@@ -120,10 +120,8 @@
       if (!alarm) return
 
       let {scheduledTime} = alarm
-      let date = new Date(scheduledTime)
-      let diffMill = Math.abs(new Date() - date)
-      let mins = diffMill / MILL_CON
-      return Math.round(mins * 100) / 100
+      let timespan = countdown(scheduledTime, new Date().getTime(), countdown.HOURS | countdown.MINUTES | countdown.SECONDS)
+      return timespan.toString(2)
     }
 
     removeAllAlarms () {
