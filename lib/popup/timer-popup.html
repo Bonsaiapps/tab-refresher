@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tab refresh options</title>
+    <style>
+      body {
+        font-family: Arial,serif;
+      }
+      #countdown {
+        display: none;
+      }
+    </style>
+    <script src="/lib/node_modules/jquery/dist/jquery.js"></script>
+    <script src="/lib/globals/chrome-promise.js"></script>
+    <script src="/lib/utils/storage.js"></script>
+    <script src="/lib/utils/tabs.js"></script>
+  </head>
+  <body>
+    <script src="timer-popup.js"></script>
+
+    <div>
+      <b>Refresh range (minutes):</b>
+      <br>
+      <br>
+      <label>
+        Start
+        <input type="text" id="start" />
+      </label>
+      <label>
+        End
+        <input type="text" id="end" />
+      </label>
+      <br>
+      <br>
+      <button id="save">Save</button>
+      <br>
+      <br>
+    </div>
+
+    <div>
+      <button id="start-active">Start Active</button>
+      <button id="disable-active">Disable Active</button>
+      <br>
+      <button id="start-all">Start All</button>
+      <button id="all-off">Disable All</button>
+    </div>
+
+    <br>
+
+    <div id="countdown">
+      <label>
+        <b>Refresh in <strong id="refresh"></strong> min</b>
+      </label>
+    </div>
+
+    <br>
+    <div id="status"></div>
+    <br>
+  </body>
+</html>
