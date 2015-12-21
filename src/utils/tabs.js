@@ -130,8 +130,12 @@
 
     addNewTab (tab) {
 
-      return this.storage.saveNew(tab)
-        .then(() => this.createAlarm(tab.id, 1, 360))
+      return this.storage.getIsOff()
+        .then(value => {
+          if (!value) return
+          return this.storage.saveNew(tab)
+            .then(() => this.createAlarm(tab.id, 1, 360))
+        })
     }
   }
 
