@@ -41,7 +41,6 @@ $(() => {
       this.$check.click(ev => this.getActiveTabAlarmTime())
       this.$allOff.click(ev => this.onAllOffClick())
       this.$startActive.click(ev => this.onStartActive())
-      this.$disableActive.click(ev => this.onDisableActive())
       this.$resetTimer.click(ev => this.onResetTimer())
     }
 
@@ -103,6 +102,7 @@ $(() => {
     }
 
     onAllOffClick () {
+      this.tabManager.storage.setter({global: {off: true}})
       this.tabManager.removeAllAlarms()
         .then(wasCleared => this.updateStatus('All tabs disabled'))
         .then(() => this.hideCountdownBlock())

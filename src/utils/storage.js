@@ -49,6 +49,18 @@
       return storage.sync.set(data)
     }
 
+    setter (data) {
+      return storage.sync.set(data)
+    }
+
+    getIsOff () {
+      return storage.sync.get('global')
+        .then((resp = {}) => {
+          d('OFF', resp)
+          return resp.off
+        })
+    }
+
     getGlobalInterval () {
       return storage.sync.get(INTERVALS)
     }
