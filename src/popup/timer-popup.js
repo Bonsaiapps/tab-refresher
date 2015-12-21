@@ -27,6 +27,7 @@ $(() => {
     $countdownBlock = $('#countdown')
     $startActive = $('#start-active')
     $disableActive = $('#disable-active')
+    $resetTimer = $('#reset-timer')
 
     constructor () {
       this.bindEvents()
@@ -40,6 +41,7 @@ $(() => {
       this.$allOff.click(ev => this.onAllOffClick())
       this.$startActive.click(ev => this.onStartActive())
       this.$disableActive.click(ev => this.onDisableActive())
+      this.$resetTimer.click(ev => this.onResetTimer())
     }
 
     setInitialInterval () {
@@ -82,7 +84,6 @@ $(() => {
     }
 
     startCountdown () {
-      chrome.alarms.getAll((all) => d('ALL', all))
       this.intervalId = setInterval(() => this.getActiveTabAlarmTime(), COUNTDOWN_DELAY)
     }
 
@@ -93,12 +94,14 @@ $(() => {
           if (!display) return this.hideCountdownBlock()
 
           this.$countdownBlock.css('display', 'block')
+          this.$resetTimer.css('display', 'block')
           this.$refresh.text(display)
         })
     }
 
     hideCountdownBlock () {
       clearInterval(this.intervalId)
+      this.$resetTimer.css('display', 'none')
       return this.$countdownBlock.css('display', 'none')
     }
 
@@ -106,6 +109,11 @@ $(() => {
       this.tabManager.removeAllAlarms()
         .then(wasCleared => this.updateStatus('All tabs disabled'))
         .then(() => this.hideCountdownBlock())
+    }
+
+    onResetTimer () {
+      this.onSaveClick()
+        .then(() => this.onStartActive())
     }
   }
 

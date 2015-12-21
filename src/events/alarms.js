@@ -5,7 +5,7 @@
  * @version 12/21/15 3:16 AM
  */
 
-((root) => {
+(() => {
 
   const TAB_RE = /tab-(\d+)/
 
@@ -21,6 +21,7 @@
       d('EventAlarms Register')
 
       chrome.alarms.onAlarm.addListener(alarm => this.onTabAlarmFired(alarm))
+      chrome.tabs.onCreated.addListener(tab => this.onNewTab(tab))
     }
 
     onTabAlarmFired (alarm) {
@@ -35,8 +36,15 @@
       let [, id] = match
       this.tabManager.refreshTab(parseInt(id, 10))
     }
+
+    onNewTab (tab) {
+      console.log('NEW tab', tab)
+
+      this.tabManager.addNewTab(tab)
+
+    }
   }
 
   new EventAlarm()
 
-})(window)
+})()
