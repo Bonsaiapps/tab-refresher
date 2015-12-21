@@ -1,6 +1,6 @@
 /**
  * @author john
- * @version 11/20/15 9:09 PM
+ * @version 12/20/15 10:17 PM
  */
 
 import gulp from 'gulp'
@@ -10,9 +10,8 @@ gulp.task(changelog)
 
 function changelog () {
   return gulp.src('changelog.md')
-    .pipe(conChangelog({
-      preset: 'angular'
-    }))
-    .pipe(gulp.dest('./'))
+  .pipe(conChangelog({
+    preset: 'angular'
+  }))
+  .pipe(gulp.dest('./'))
 }
-
