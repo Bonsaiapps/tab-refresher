@@ -23,7 +23,9 @@ export function babel () {
 
 export const staticsSrc = [
   paths.src('**/*.png'),
-  paths.src('**/*.html')
+  paths.src('**/*.html'),
+  paths.src('**/*.css'),
+  paths.src('**/fonts/*.*')
 ]
 export function statics () {
 

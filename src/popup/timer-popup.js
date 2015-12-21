@@ -28,6 +28,7 @@ $(() => {
     $startActive = $('#start-active')
     $disableActive = $('#disable-active')
     $resetTimer = $('#reset-timer')
+    $disabledText = $('#disabled-text')
 
     constructor () {
       this.bindEvents()
@@ -62,10 +63,6 @@ $(() => {
 
     }
 
-    onDisableActive () {
-
-    }
-
     onSaveClick () {
       return this.tabManager.saveRangeForCurrentTab(this.$start.val(), this.$end.val())
         .then(() => this.updateStatus('Refresh interval saved!'))
@@ -94,14 +91,14 @@ $(() => {
           if (!display) return this.hideCountdownBlock()
 
           this.$countdownBlock.css('display', 'block')
-          this.$resetTimer.css('display', 'block')
+          this.$disabledText.css('display', 'none')
           this.$refresh.text(display)
         })
     }
 
     hideCountdownBlock () {
       clearInterval(this.intervalId)
-      this.$resetTimer.css('display', 'none')
+      this.$disabledText.css('display', 'block')
       return this.$countdownBlock.css('display', 'none')
     }
 
@@ -121,5 +118,5 @@ $(() => {
    * Constructor will bind any events
    *  and set initial interval, default or storage
    */
-  let timerPopup = new TimerPopup()
+  new TimerPopup()
 })
