@@ -40,6 +40,15 @@
       return storage.sync.set(data)
     }
 
+    saveNew (tab) {
+      let id = tab.id
+      let data = {
+        [id + '']: { start: START, end: END, id }
+      }
+
+      return storage.sync.set(data)
+    }
+
     getGlobalInterval () {
       return storage.sync.get(INTERVALS)
     }

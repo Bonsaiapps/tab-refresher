@@ -62,8 +62,8 @@
       d('period', period, start, end)
       let alarmInfo = {
         //when: Date.now() + 10000
-        delayInMinutes: period
-        //periodInMinutes: period
+        delayInMinutes: period,
+        periodInMinutes: period
       }
 
       return chrome.alarms.create(name, alarmInfo)
@@ -128,6 +128,12 @@
 
     removeAllAlarms () {
       return alarms.clearAll()
+    }
+
+    addNewTab (tab) {
+
+      return this.storage.saveNew(tab)
+        .then(() => this.createAlarm(tab.id, 1, 360))
     }
   }
 
