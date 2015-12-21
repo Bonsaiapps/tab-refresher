@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tab refresh options</title>
+    <style>
+      body {
+        font-family: Arial,serif;
+      }
+    </style>
+    <script src="/lib/node_modules/jquery/dist/jquery.js"></script>
+    <script src="/lib/globals/chrome-promise.js"></script>
+    <script src="/lib/utils/storage.js"></script>
+    <script src="/lib/utils/tabs.js"></script>
+  </head>
+  <body>
+    <script src="timer-popup.js"></script>
+    <b>Refresh Time</b>
+    <br>
+    <label>
+      <strong>Period</strong> (minutes)
+      <input type="text" id="period" />
+    </label>
+    <br>
+    <br>
+    <label>
+      <b>Current Refresh Value:</b>
+      <span id="cur_refresh_value"></span>
+    </label>
+
+    <div id="form_status"></div>
+
+    <button id="save">Save</button>
+
+  </body>
+</html>

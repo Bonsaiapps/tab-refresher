@@ -1,4 +1,5 @@
 import path from 'path'
+import gulp from 'gulp'
 
 /**
  * Gulp Build Config
@@ -7,13 +8,15 @@ import path from 'path'
  * @version 12/20/15 10:17 PM
  */
 
+const root = './'
+export let resolveSrc = resolveTo('src')
+export let resolveDist = resolveTo('lib')
 
-export const paths {
-
+export const paths = {
+  src: resolveSrc,
+  dist: resolveDist
 }
 
-
-export let resolveSrc = resolveTo('src')
 
 
 export function reg (...tasks) {

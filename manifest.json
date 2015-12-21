@@ -1,16 +1,29 @@
 {
+  "name": "Tab Refresher",
   "manifest_version": 2,
-
-  "name": "Getting started example",
-  "description": "This extension shows a Google Image search result for the current page",
-  "version": "1.0",
-
-  "browser_action": {
-    "default_icon": "icon.png",
-    "default_popup": "popup.html"
-  },
+  "description": "This extension will refresh browser tabs at random intervals",
+  "version": "0.0.1",
   "permissions": [
-    "activeTab",
-    "https://ajax.googleapis.com/"
-  ]
+    "tabs",
+    "storage",
+    "alarms"
+  ],
+  "browser_action": {
+    "default_icon": "lib/img/icon48.png",
+    "default_popup": "lib/popup/timer-popup.html",
+    "default_title": "Auto Tab Refresh"
+  },
+  "icons": {
+    "16": "lib/img/icon16.png",
+    "48": "lib/img/icon48.png",
+    "128": "lib/img/icon128.png"
+  },
+  "background": {
+    "scripts": [
+      "lib/globals/chrome-promise.js",
+      "/lib/utils/tabs.js",
+      "lib/events/alarms.js"
+    ],
+    "persistent": false
+  }
 }

@@ -20,8 +20,8 @@
   "scripts": {
     "lint": "echo \"Get eslint when eslint-babel supports v6\"",
     "test": "npm run lint",
-    "build": "rm -rf lib && babel src --out-dir lib",
-    "dev": "npm run build -- -w",
+    "build": "rm -rf lib && gulp build",
+    "dev": "npm run build && gulp watch",
     "prepush": "npm test",
     "prepublish": "npm run build",
     "rel": "./bin/release.sh"
@@ -31,9 +31,13 @@
     "babel-core": "^6.3.21",
     "babel-preset-es2015": "6.3.13",
     "babel-preset-stage-0": "6.3.13",
-    "debug": "^2.2.0",
+    "chrome-promise": "^1.0.6",
     "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-babel": "^6.1.1",
     "gulp-conventional-changelog": "^0.7.0",
+    "gulp-npm-files": "git://github.com/hitchcockwill/gulp-npm-files#develop"
+  },
+  "dependencies": {
     "jquery": "^2.1.4",
     "lodash": "^3.10.1"
   }
