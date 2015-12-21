@@ -6,26 +6,51 @@
 
 ((root) => {
 
-  const PERIOD = 'period'
+  const START = 1
+  const END = 360
+
+  const INTERVALS = 'intervals'
 
   let {storage} = chrome.promise
 
   class ExtStorage {
-
-    getInterval () {
-      return storage.sync.get(PERIOD)
-    }
-
     cleanInterval (val) {
       val = parseInt(val, 10)
       return -val > 0 ? -val : val
     }
 
-    saveInterval (period) {
-      d('per', period)
+    getInterval (tab = {}) {
+      d('getInter', tab)
+      let id = tab.id
+      return storage.sync.get(id + '')
+        .then(resp => {
+          d('get interval', resp)
+          return resp[id]
+        })
+        .then(({ start = START, end = END } = {}) => ({ start, end, id }))
+    }
+
+    saveCurrent (start, end, tab) {
+
+      let id = tab.id
+      let data = {
+        [id + '']: { start, end, id }
+      }
+
+      return storage.sync.set(data)
+    }
+
+    getGlobalInterval () {
+      return storage.sync.get(INTERVALS)
+    }
+
+    saveGlobalInterval (start, end) {
+
+      start = this.cleanInterval(start)
+      end = this.cleanInterval(end)
 
       let data = {
-        [PERIOD]: period
+        [INTERVALS]: { start, end }
       }
 
       return storage.sync.set(data)

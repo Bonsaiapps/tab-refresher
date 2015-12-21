@@ -21,7 +21,8 @@
   "background": {
     "scripts": [
       "lib/globals/chrome-promise.js",
-      "/lib/utils/tabs.js",
+      "lib/utils/storage.js",
+      "lib/utils/tabs.js",
       "lib/events/alarms.js"
     ],
     "persistent": false
