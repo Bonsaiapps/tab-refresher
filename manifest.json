@@ -2,7 +2,7 @@
   "name": "Tab Refresher",
   "manifest_version": 2,
   "description": "This extension will refresh browser tabs at random intervals",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "permissions": [
     "tabs",
     "storage",
