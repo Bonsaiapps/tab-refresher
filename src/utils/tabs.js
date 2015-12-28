@@ -112,16 +112,6 @@
           d('active name', name)
           return alarms.get(name)
         })
-        .then(alarm => this.parseAlarmTime(alarm))
-    }
-
-    parseAlarmTime (alarm) {
-      d('active alarm', alarm)
-      if (!alarm) return
-
-      let {scheduledTime} = alarm
-      let timespan = countdown(scheduledTime, new Date().getTime(), countdown.HOURS | countdown.MINUTES | countdown.SECONDS)
-      return timespan.toString(2)
     }
 
     removeAllAlarms () {
@@ -132,7 +122,8 @@
 
       return this.storage.getIsOff()
         .then(value => {
-          if (!value) return
+          if (value) return
+          d('NOT OFF, adding new tab')
           return this.storage.saveNew(tab)
             .then(() => this.createAlarm(tab.id, 1, 360))
         })

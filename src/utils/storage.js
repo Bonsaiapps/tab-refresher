@@ -14,6 +14,7 @@
   let {storage} = chrome.promise
 
   class ExtStorage {
+
     cleanInterval (val) {
       val = parseInt(val, 10)
       return -val > 0 ? -val : val
@@ -55,9 +56,9 @@
 
     getIsOff () {
       return storage.sync.get('global')
-        .then((resp = {}) => {
-          d('OFF', resp)
-          return resp.off
+        .then(({global = {}}) => {
+          d('OFF', global)
+          return global.off
         })
     }
 

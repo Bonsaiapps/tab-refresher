@@ -7,12 +7,12 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/j-walker23/tab-refresher.git"
+    "url": "git+https://github.com/Bonsaiapps/tab-refresher.git"
   },
   "bugs": {
-    "url": "https://github.com/j-walker23/tab-refresher/issues"
+    "url": "https://github.com/Bonsaiapps/tab-refresher/issues"
   },
-  "homepage": "https://github.com/j-walker23/tab-refresher#readme",
+  "homepage": "https://github.com/Bonsaiapps/tab-refresher#readme",
   "keywords": [],
   "files": [
     "lib/"
