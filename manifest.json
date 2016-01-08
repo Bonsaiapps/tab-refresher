@@ -10,7 +10,7 @@
   ],
   "browser_action": {
     "default_icon": "lib/img/icon48.png",
-    "default_popup": "lib/popup/timer-popup.html",
+    "default_popup": "lib/popup-timer/popup-timer.html",
     "default_title": "Auto Tab Refresh"
   },
   "icons": {
