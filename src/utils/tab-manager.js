@@ -21,6 +21,7 @@
 
   class TabManager extends StorageManager {
 
+
     getActiveTab () {
 
       return chrome.promise.tabs.query(ACTIVE_QUERY)
@@ -84,6 +85,11 @@
 
     removeAllAlarms () {
       return chrome.promise.alarms.clearAll()
+    }
+
+    refreshTab (id) {
+      return chrome.promise.tabs.reload(id)
+        .then(() => d(`tab-${id} was reloaded!`))
     }
   }
 

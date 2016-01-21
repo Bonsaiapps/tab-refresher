@@ -42,7 +42,7 @@
     getSavedInterval (tab) {
       return storage.sync.get(TABS_KEY)
         .then(({tabs = {}}) => {
-          d('Saved Interval Results', tabs)
+          d('Saved Interval Results', 'id', tab.id, 'Results', tabs)
           let interval = tabs[tab.id]
           if (!interval)
             return { start: START, end: END, id: tab.id }
@@ -68,6 +68,23 @@
           storage.sync.set({[TABS_KEY]: storageTabsToSave})
 
           return needAlarms
+        })
+    }
+
+    saveInterval (tab, start, end) {
+      return storage.sync.get(TABS_KEY)
+        .then(({tabs = {}}) => {
+          d('SAVED', tabs)
+          tabs[tab.id] = {
+            start,
+            end,
+            id: tab.id
+          }
+
+          let saved = {
+            [TABS_KEY]: tabs
+          }
+          return storage.sync.set(saved)
         })
     }
 

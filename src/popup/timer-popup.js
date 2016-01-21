@@ -92,9 +92,11 @@ $(() => {
       this.tabManager.removeAllAlarms()
         .then(() => this.hideCountdownBlock())
     }
+
     onSaveClick () {
       return this.tabManager.saveRangeForCurrentTab(this.$startRange.val(), this.$endRange.val())
     }
+
     onStartResetClick () {
       this.onSaveClick()
         .then(() => this.onStartActive())
