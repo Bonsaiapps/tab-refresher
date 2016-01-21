@@ -10,7 +10,7 @@
   class PopupTimer {
 
     timeoutId = null
-    alarm = null
+    tab = null
 
     manager = new TabManager()
 
@@ -30,14 +30,18 @@
 
     checkCurrentRefreshTimer () {
       d('Start checking timer for current tab')
-      let _tab
-      this.alarm = null
+      this.tab = null
+      this.manager.getAllTabs()
+        .then(tabs => {
+          let ids = tabs.map(x => x.id)
+          d('ALL IDS', ids)
+        })
       return this.manager.getActiveTab()
-        .then(tab => _tab = tab)
+        .then(tab => this.tab = tab)
         .then(tab => this.manager.getSavedInterval(tab))
         .then(interval => this.fillInRanges(interval))
         .then(() => this.manager.checkIfExtensionIsOn())
-        .then(() => this.manager.getAlarm(_tab))
+        .then(() => this.manager.getAlarm(this.tab))
         .then(alarm => this.parseAlarmTime(alarm))
     }
 
@@ -78,6 +82,16 @@
       return this.manager.disableGlobalSettings()
         .then(() => this.manager.removeAllAlarms())
         .then(() => this.clearValues())
+    }
+
+    onStartResetClick () {
+      this.manager.saveGlobalSettings()
+      this.clearValues()
+      return this.manager.saveInterval(this.tab, this.$startRange.val(), this.$endRange.val())
+        .then(() => this.manager.getSavedInterval(this.tab))
+        .then(interval => this.manager.createAlarm(interval))
+        .then(() => this.manager.getAlarm(this.tab))
+        .then(alarm => this.parseAlarmTime(alarm))
     }
 
   }

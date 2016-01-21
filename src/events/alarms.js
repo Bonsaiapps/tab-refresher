@@ -11,7 +11,7 @@
 
   class EventAlarm {
 
-    tabManager = new TabManager()
+    manager = new TabManager()
 
     constructor () {
       this.register()
@@ -28,20 +28,20 @@
       d('alarm', alarm)
       let {name} = alarm
       let match = TAB_RE.exec(name)
-      if (!match) {
-        return d('TAB NAME MISMATCH', name)
-      }
 
-      d('match', match)
-      let [, id] = match
-      this.tabManager.refreshTab(parseInt(id, 10))
+      if (!match) return d('TAB NAME MISMATCH', name)
+
+      let id = match[1]
+      this.manager.refreshTab(parseInt(id, 10))
     }
 
     onNewTab (tab) {
-      console.log('NEW tab', tab)
+      console.log('New tab opened', tab)
 
-      this.tabManager.addNewTab(tab)
-
+      this.manager.checkIfExtensionIsOn()
+        .then(() => this.manager.getSavedInterval(tab))
+        .then(interval => this.manager.createAlarm(interval))
+        .catch(err => console.warn(err))
     }
   }
 
