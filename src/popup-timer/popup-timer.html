@@ -11,18 +11,18 @@
     <script src="countdown.js"></script>
     <script src="../node_modules/jquery/dist/jquery.js"></script>
     <script src="../globals/chrome-promise.js"></script>
-    <script src="../utils/storage.js"></script>
-    <script src="../utils/tabs.js"></script>
+    <script src="../utils/storage-manager.js"></script>
+    <script src="../utils/tab-manager.js"></script>
+    <script src="popup-timer.js"></script>
   </head>
   <body>
-    <script src="timer-popup.js"></script>
 
     <div class="container main">
       <div class="row">
         <div class="col-xs-12">
           <div>
 
-            <div action="javascript:void(0);" novalidate>
+            <div>
 
               <label><strong>Refresh Range</strong> (minutes)</label>
 
@@ -65,5 +65,6 @@
         </div>
       </div>
     </div>
+    <script src="timer-startup.js"></script>
   </body>
 </html>
