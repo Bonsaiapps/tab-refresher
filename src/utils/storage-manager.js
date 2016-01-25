@@ -8,12 +8,9 @@
 (() => {
 
   const SETTINGS_KEY = 'settings'
-  const TABS_KEY = 'tabs'
+  const LAST_TAB_KEY = 'lastTab'
 
-  const START = 1
-  const END = 360
-
-  let {storage} = chrome.promise
+  let {storage, windows} = chrome.promise
 
   class StorageManager {
 
@@ -21,71 +18,61 @@
       return storage.sync.get(SETTINGS_KEY)
         .then(({settings = {}}) => {
           d('Storage Settings Response', settings)
-          if (!settings.on)
+          if (!settings.yes)
             throw new Error('Extension is off!')
-          return true
+          return settings
         })
     }
 
     saveGlobalSettings () {
-      let settings = { [SETTINGS_KEY]: { on: true } }
-      d('Saving Settings', settings)
-      return storage.sync.set(settings)
+      let _win
+      return windows.getCurrent()
+        .then(win => {
+          _win = win
+          let settings = { [SETTINGS_KEY]: { yes: true, windowId: win.id} }
+          return storage.sync.set(settings)
+        })
+        .then(() => _win)
     }
 
     disableGlobalSettings () {
-      let settings = { [SETTINGS_KEY]: { on: false } }
+      let settings = { [SETTINGS_KEY]: { yes: false } }
       d('Saving Settings', settings)
       return storage.sync.set(settings)
     }
 
-    getSavedInterval (tab) {
-      return storage.sync.get(TABS_KEY)
-        .then(({tabs = {}}) => {
-          d('Saved Interval Results', 'id', tab.id, 'Results', tabs)
-          let interval = tabs[tab.id]
-          if (!interval)
-            return { start: START, end: END, id: tab.id }
-          return interval
+    getTimestampTab (tab) {
+      return storage.sync.get(tab.id + '')
+        .then(tabData => {
+          let data = tabData[tab.id] || {}
+          d('TAB', tab)
+          d('Saved tab data', data)
+          return data
         })
     }
 
-    getAllIntervals (chromeTabs) {
-      return storage.sync.get(TABS_KEY)
-        .then(({tabs = {}}) => {
+    saveLast (saveList) {
+      let last = saveList[saveList.length - 1]
+      d('Saving last', last)
+      let obj = { [LAST_TAB_KEY]: last }
+      return storage.sync.set(obj)
+        .then(() => {
 
-          let needAlarms = []
-          let storageTabsToSave = {}
-          chromeTabs.forEach(tab => {
-            let interval = tabs[tab.id]
-
-            if (!interval)
-              interval = { start: START, end: END, id: tab.id }
-            needAlarms.push(interval)
-            storageTabsToSave[tab.id] = interval
+          let date = new Date().getTime()
+          let saveObj = {}
+          saveList.forEach(tab => {
+            let current = {id: tab.id, url: tab.url, index: tab.index, timestamp: date}
+            saveObj[current.id] = current
           })
 
-          storage.sync.set({[TABS_KEY]: storageTabsToSave})
-
-          return needAlarms
+          //let tabsObj = { [TABS_KEY]: saveObj}
+          return storage.sync.set(saveObj)
         })
     }
 
-    saveInterval (tab, start, end) {
-      return storage.sync.get(TABS_KEY)
-        .then(({tabs = {}}) => {
-          d('SAVED', tabs)
-          tabs[tab.id] = {
-            start,
-            end,
-            id: tab.id
-          }
-
-          let saved = {
-            [TABS_KEY]: tabs
-          }
-          return storage.sync.set(saved)
-        })
+    getLast () {
+      return storage.sync.get(LAST_TAB_KEY)
+        .then(obj => obj[LAST_TAB_KEY])
     }
 
   }

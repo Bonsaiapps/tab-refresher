@@ -8,8 +8,8 @@
       }
     </style>
     <link rel="stylesheet" href="bootstrap.css">
-    <script src="countdown.js"></script>
     <script src="../node_modules/jquery/dist/jquery.js"></script>
+    <script src="../node_modules/moment/moment.js"></script>
     <script src="../globals/chrome-promise.js"></script>
     <script src="../utils/storage-manager.js"></script>
     <script src="../utils/tab-manager.js"></script>
@@ -20,30 +20,6 @@
     <div class="container main">
       <div class="row">
         <div class="col-xs-12">
-          <div>
-
-            <div>
-
-              <label><strong>Refresh Range</strong> (minutes)</label>
-
-              <div class="form-group">
-
-                <label>Start</label>
-                <input class="form-control input-sm" type="text" id="start-range" />
-              </div>
-
-              <div class="form-group">
-
-                <label>End</label>
-                <input class="form-control input-sm" type="text" id="end-range" />
-              </div>
-
-              <div class="form-group">
-                <button class="btn btn-sm btn-default" id="start-reset">Start/Reset Timer</button>
-              </div>
-
-            </div>
-          </div>
 
           <div class="form-group">
             <button class="btn btn-sm btn-default" id="start-all">Start All</button>
@@ -52,13 +28,7 @@
 
           <div class="form-group">
             <label>
-              <b>Next refresh: <strong id="refresh-val"></strong></b>
-            </label>
-          </div>
-
-          <div class="form-group">
-            <label>
-              <b>Refresh Interval: <strong id="interval-val"></strong></b>
+              <b>Last Refresh: <strong id="last-refresh-val"></strong></b>
             </label>
           </div>
 
