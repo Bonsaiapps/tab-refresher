@@ -7,24 +7,72 @@
 
 (() => {
 
-
-  const ACTIVE_QUERY = {
-    currentWindow: true,
-    status: 'complete',
-    active: true
-  }
-
-  const ALL_TABS_QUERY = {
-    currentWindow: true,
-    status: 'complete'
-  }
-
   class TabManager extends StorageManager {
 
+    doReload (tabs) {
+      return this.getLast()
+        .then(lastTab => {
+          d('LastTab', lastTab)
+          let last = -1
 
-    getActiveTab () {
+          if (lastTab)
+            lastTab = tabs.find(x => x.id === lastTab.id)
 
-      return chrome.promise.tabs.query(ACTIVE_QUERY)
+          if (lastTab)
+            last = lastTab.index
+
+          return this.reloadNextTwo(tabs, last)
+        })
+    }
+
+    reloadNextTwo (tabs, lastIndex) {
+      let len = tabs.length
+      d('Reload next', 'len', len, 'lastIndex', lastIndex)
+      let promises
+      let save
+
+      let nextPossIndex = lastIndex + 1
+
+      let diff = len - nextPossIndex
+
+      if (!diff) {
+        // was last tab, start at beginning
+        nextPossIndex = 0
+        diff = 1
+      }
+
+      if (diff === 1) {
+        save = [tabs.find(x => x.index == nextPossIndex)]
+
+      } else if (diff > 1) {
+        let one = tabs.find(x => x.index == nextPossIndex)
+        let two = tabs.find(x => x.index == nextPossIndex + 1)
+
+        save = [one, two]
+      }
+
+      promises = save.map(tab => {
+        return chrome.promise.tabs.reload(tab.id)
+      })
+
+      return this.saveLast(save)
+        .then(() => Promise.all(promises))
+
+    }
+
+    getAllTabs (windowId) {
+      return chrome.promise.tabs.query({windowId: windowId})
+    }
+
+    getActiveTab (windowId) {
+
+      let query = {
+        windowId: windowId,
+        status: 'complete',
+        active: true
+      }
+
+      return chrome.promise.tabs.query(query)
         .then((tabs = []) => {
           if (!tabs.length)
             throw new Error('No active tab!')
@@ -33,64 +81,6 @@
         })
     }
 
-    getAllTabs () {
-      return chrome.promise.tabs.query(ALL_TABS_QUERY)
-    }
-
-    cleanInterval (interval) {
-      interval.start = this.cleanVal(interval.start)
-      interval.end = this.cleanVal(interval.end)
-      return interval
-    }
-
-    cleanVal (val) {
-      val = parseInt(val, 10)
-      return -val > 0 ? -val : val
-    }
-
-    createAlarms (tabIntervals) {
-      let promises = tabIntervals.map(x => this.createAlarm(x))
-      return Promise.all(promises)
-    }
-
-    createAlarm (interval) {
-      this.cleanInterval(interval)
-      let {start, end, id} = interval
-      let name = `tab-${id}`
-      let period = this.generateMinutes(start, end)
-      d('Creating Alarm', name, start, end, id, period)
-
-      let alarmInfo = {
-        delayInMinutes: period,
-        periodInMinutes: period
-      }
-
-      return chrome.alarms.create(name, alarmInfo)
-    }
-
-    generateMinutes (start, end) {
-      return Math.floor((Math.random() * (end - start)) + start)
-    }
-
-    getAlarm (tab) {
-      let name = `tab-${tab.id}`
-      d('Getting alarm', name)
-      return chrome.promise.alarms.get(name)
-        .then(alarm => {
-          if (!alarm) throw new Error('Invalid alarm name ' + name)
-          d('Alarm Results', alarm)
-          return alarm
-        })
-    }
-
-    removeAllAlarms () {
-      return chrome.promise.alarms.clearAll()
-    }
-
-    refreshTab (id) {
-      return chrome.promise.tabs.reload(id)
-        .then(() => d(`tab-${id} was reloaded!`))
-    }
   }
 
   window.TabManager = TabManager
