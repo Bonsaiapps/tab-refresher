@@ -1,3 +1,13 @@
+<a name="0.0.8"></a>
+## [0.0.8](https://github.com/Bonsaiapps/tab-refresher/compare/0.0.8...v0.0.8) (2016-03-09)
+
+
+### Features
+
+* **refresh url:** display ([6cc6c5a](https://github.com/Bonsaiapps/tab-refresher/commit/6cc6c5a))
+
+
+
 <a name="0.0.7"></a>
 ## [0.0.7](https://github.com/Bonsaiapps/tab-refresher/compare/0.0.6...v0.0.7) (2016-03-09)
 
