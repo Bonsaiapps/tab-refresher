@@ -1,3 +1,13 @@
+<a name="0.0.7"></a>
+## [0.0.7](https://github.com/Bonsaiapps/tab-refresher/compare/0.0.6...v0.0.7) (2016-03-09)
+
+
+### Features
+
+* **old random:** bring it back as master. 0.0.7 still holds 2 tab refresher ([3f81e70](https://github.com/Bonsaiapps/tab-refresher/commit/3f81e70))
+
+
+
 <a name="0.0.5"></a>
 ## [0.0.5](https://github.com/Bonsaiapps/tab-refresher/compare/0.0.5...v0.0.5) (2016-01-21)
 

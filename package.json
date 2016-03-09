@@ -1,6 +1,6 @@
 {
   "name": "tab-refresher",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "lib/index",
   "description": "Refresh intervals on chrome tabs",
   "author": "Jared Blake",
