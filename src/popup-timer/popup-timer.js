@@ -21,6 +21,7 @@
     $disableAll = $('#disable-all')
     $startReset = $('#start-reset')
     $intervalVal = $('#interval-val')
+    $lastUrl = $('#last-url')
 
     bindEvents () {
       this.$startAll.click(ev => this.onStartAllClick())
@@ -46,10 +47,11 @@
     }
 
     fillInRanges (interval) {
-      let {start, end} = interval
-      d('start', start, end)
+      let {start, end, url} = interval
+      d('start', start, end, url)
       this.$startRange.val(start)
       this.$endRange.val(end)
+      this.$lastUrl.text(url || 'None')
       return interval
     }
 

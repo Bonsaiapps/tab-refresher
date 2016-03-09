@@ -88,6 +88,21 @@
         })
     }
 
+    saveTabUrl (id) {
+      return chrome.promise.tabs.get(id)
+        .then(tab => {
+          return storage.sync.get(TABS_KEY)
+            .then(({tabs = {}}) => {
+              d('SAVED', tabs)
+              tabs[tab.id].url = tab.url
+              let saved = {
+                [TABS_KEY]: tabs
+              }
+              return storage.sync.set(saved)
+            })
+
+        })
+    }
   }
 
   window.StorageManager = StorageManager

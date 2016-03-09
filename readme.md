@@ -5,6 +5,8 @@
 
 **All commands are run from project root directory**
 
+All work should be done on the develop branch, including commands below.
+
 ### Dev Setup
 - `./bin/install.sh`
 
@@ -15,4 +17,7 @@
 - `npm run dev`
 
 ### Create Release/Tag
+- Commit and push any changes to develop
 - `./bin/release.sh`
+  - Release script can take an argument, "patch" is default. Options are (patch|minor|major) for determining how to bump the versions
+  `./bin/release.sh major` would set versions and new tag from `0.0.5` to `1.0.0`

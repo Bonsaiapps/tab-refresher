@@ -15,7 +15,6 @@
   }
 
   const ALL_TABS_QUERY = {
-    currentWindow: true,
     status: 'complete'
   }
 
@@ -88,7 +87,8 @@
     }
 
     refreshTab (id) {
-      return chrome.promise.tabs.reload(id)
+      return this.saveTabUrl(id)
+        .then(() => chrome.promise.tabs.reload(id))
         .then(() => d(`tab-${id} was reloaded!`))
     }
   }
