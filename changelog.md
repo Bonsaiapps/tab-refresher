@@ -1,3 +1,13 @@
+<a name="0.0.9"></a>
+## [0.0.9](https://github.com/Bonsaiapps/tab-refresher/compare/0.0.9...v0.0.9) (2016-04-04)
+
+
+### Features
+
+* **refresher:** ajax loggin requests ([502864a](https://github.com/Bonsaiapps/tab-refresher/commit/502864a))
+
+
+
 <a name="0.0.8"></a>
 ## [0.0.8](https://github.com/Bonsaiapps/tab-refresher/compare/0.0.8...v0.0.8) (2016-03-09)
 
