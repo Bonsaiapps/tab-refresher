@@ -13,6 +13,8 @@
   const START = 1
   const END = 360
 
+  const LOGGING_URL = 'http://py1.systemadmin.com:5020/log'
+
   let {storage} = chrome.promise
 
   class StorageManager {
@@ -65,7 +67,7 @@
             storageTabsToSave[tab.id] = interval
           })
 
-          storage.sync.set({[TABS_KEY]: storageTabsToSave})
+          storage.sync.set({ [TABS_KEY]: storageTabsToSave })
 
           return needAlarms
         })
@@ -89,8 +91,10 @@
     }
 
     saveTabUrl (id) {
+      let _tab
       return chrome.promise.tabs.get(id)
         .then(tab => {
+          _tab = tab
           return storage.sync.get(TABS_KEY)
             .then(({tabs = {}}) => {
               d('SAVED', tabs)
@@ -100,8 +104,19 @@
               }
               return storage.sync.set(saved)
             })
-
+            .then(() => this.logRequest(_tab, true))
         })
+        .then(() => _tab)
+    }
+
+    logRequest (tab, before) {
+      d('logging for tab', tab.id)
+      let data = { url: tab.url, tab_id: tab.id }
+      if (before)
+        data['before'] = true
+      else
+        data['after'] = true
+      return $.get(LOGGING_URL, data)
     }
   }
 

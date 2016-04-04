@@ -20,6 +20,7 @@
   },
   "background": {
     "scripts": [
+      "lib/node_modules/jquery/dist/jquery.js",
       "lib/globals/chrome-promise.js",
       "lib/utils/storage-manager.js",
       "lib/utils/tab-manager.js",

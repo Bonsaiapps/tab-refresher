@@ -87,9 +87,15 @@
     }
 
     refreshTab (id) {
+      let _tab
       return this.saveTabUrl(id)
+        .then(tab => _tab = tab)
         .then(() => chrome.promise.tabs.reload(id))
-        .then(() => d(`tab-${id} was reloaded!`))
+        .then(() => {
+          d(`tab-${id} was reloaded!`)
+          return this.logRequest(_tab)
+
+        })
     }
   }
 
