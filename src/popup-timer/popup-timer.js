@@ -45,7 +45,7 @@
         .then(() => this.showSuccessIcon())
         .catch(err => console.error(err))
     }
-    
+
     showSuccessIcon () {
       this.$successIcon.addClass('on')
       return new Promise(resolve => {
@@ -57,16 +57,8 @@
     }
 
     checkCurrentRefreshTimer () {
-      d('Start checking timer for current tab')
       this.tab = null
-      this.manager.getAllTabs()
-        .then(tabs => {
-          d('Open Tabs')
-          tabs.forEach(({ id, url }) => {
-            d('id', id, url)
-          })
-          d('')
-        })
+      this.manager.getAllTabs('Starting Tabs')
       return this.manager.getActiveTab()
         .then(tab => this.tab = tab)
         .then(tab => this.manager.getSavedInterval(tab))
@@ -77,8 +69,10 @@
     }
 
     fillInRanges (interval) {
-      let { start, end, url } = interval
-      d('start', start, end, url)
+      let { id, start, end } = interval
+
+      d('%cCurrent - id:%c %d %crange:%c %d-%d', BOLD, NORMAL, id, BOLD, NORMAL, start, end)
+      console.groupEnd()
       this.$startRange.val(start)
       this.$endRange.val(end)
       return interval
@@ -91,8 +85,11 @@
     }
 
     parseAlarmTime (alarm) {
-      // d('Parsing Alarm', alarm)
-      let { scheduledTime, periodInMinutes } = alarm
+
+      let { scheduledTime, periodInMinutes, name } = alarm
+      if (!this.timeoutId)
+        d('%cParsing Alarm - Name%c: %s %cPeriod%c: %d', BOLD, NORMAL, name, BOLD, NORMAL, periodInMinutes)
+
       this.$intervalVal.text(`${periodInMinutes}m`)
       let timeSpan = countdown(scheduledTime, new Date().getTime(), countdown.HOURS | countdown.MINUTES | countdown.SECONDS)
       this.$refreshVal.text(timeSpan.toString(4))

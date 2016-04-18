@@ -31,8 +31,19 @@
         })
     }
 
-    getAllTabs () {
-      return chrome.promise.tabs.query(ALL_TABS_QUERY)
+    logTabs (tabs, header) {
+      console.groupCollapsed(header)
+      tabs.forEach(tab => {
+        let {id, url} = tab
+        d('%cid%c %d %curl%c %s', BOLD, NORMAL, id, BOLD, NORMAL, url)
+      })
+      d('')
+    }
+
+    async getAllTabs (header) {
+      let tabs = await chrome.promise.tabs.query(ALL_TABS_QUERY)
+      if (header) this.logTabs(tabs, header)
+      return tabs
     }
 
     cleanInterval (interval) {
@@ -72,11 +83,9 @@
 
     getAlarm (tab) {
       let name = `tab-${tab.id}`
-      d('Getting alarm', name)
       return chrome.promise.alarms.get(name)
         .then(alarm => {
           if (!alarm) throw new Error('Invalid alarm name ' + name)
-          d('Alarm Results', alarm)
           return alarm
         })
     }

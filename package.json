@@ -34,8 +34,7 @@
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-babel": "^6.1.2",
     "gulp-conventional-changelog": "^1.1.0",
-    "gulp-npm-files": "git://github.com/hitchcockwill/gulp-npm-files#develop",
-    "jspm": "^0.17.0-beta.13"
+    "gulp-npm-files": "git://github.com/hitchcockwill/gulp-npm-files#develop"
   },
   "dependencies": {
     "jquery": "^2.2.3"

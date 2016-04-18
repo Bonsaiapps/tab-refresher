@@ -16,7 +16,7 @@ gulp.task('build', gulp.parallel(babel, statics, vendors))
 export function babel () {
   let src = [
     paths.src('**/*.js'),
-    paths.src('vendor/**/*.js', true)
+    paths.src('vendor/**/*.js', '!')
   ]
   return gulp.src(src)
     .pipe(gulpBabel({
@@ -29,7 +29,8 @@ export const staticsSrc = [
   paths.src('**/*.png'),
   paths.src('**/*.html'),
   paths.src('**/*.css'),
-  paths.src('**/fonts/*.*')
+  paths.src('**/fonts/*.*'),
+  paths.src('**/vendor/**/*.js')
 ]
 export function statics () {
 

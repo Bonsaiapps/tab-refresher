@@ -10,13 +10,40 @@
 
   class LogScript {
 
-    constructor () {
-      this.registerEvents()
+    registerEvents () {
+      chrome.runtime.onMessage.addListener(message => this.onGetLogs(message))
+    }
+
+    createTableShell () {
       document.body.innerHTML = `
+        <style> 
+          * {
+            box-sizing: border-box;
+          }
+          body {
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #333;
+          }
+          table {
+            border-collapse: collapse;
+            border-spacing: 0;
+          }
+          thead tr th {
+            border: 1px solid #ddd;
+            border-bottom-width: 2px;
+            padding: 8px;
+          }
+          tbody tr td {
+            border: 1px solid #ddd;
+            padding: 8px;
+          }
+        </style>
         <div> 
+          <br><br>
           <h1 style="text-align: center;">Tab Refresh Logs</h1>
-          <br>
-          <br>
+          <br><br>
           <table style="margin: auto;"> 
             <thead> 
               <tr> 
@@ -32,14 +59,8 @@
       `
     }
 
-    registerEvents () {
-      chrome.runtime.onMessage.addListener(message => this.onGetLogs(message))
-    }
-
     onGetLogs (logJson) {
       let logs = JSON.parse(logJson)
-      console.log('logs', logs)
-
       let html = logs.map(log => `
         <tr> 
           <td>${log.tab_id}</td>
@@ -57,6 +78,8 @@
 
   }
 
-  new LogScript()
+  let script = new LogScript()
+  script.registerEvents()
+  script.createTableShell()
 
 })()

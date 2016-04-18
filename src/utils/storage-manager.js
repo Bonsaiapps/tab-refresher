@@ -20,9 +20,8 @@
   class StorageManager {
 
     checkIfExtensionIsOn () {
-      return storage.sync.get(SETTINGS_KEY)
+      return storage.local.get(SETTINGS_KEY)
         .then(({ settings = {} }) => {
-          d('Storage Settings Response', settings)
           if (!settings.on)
             throw new Error('Extension is off!')
           return true
@@ -32,28 +31,29 @@
     saveGlobalSettings () {
       let settings = { [SETTINGS_KEY]: { on: true } }
       d('Saving Settings', settings)
-      return storage.sync.set(settings)
+      return storage.local.set(settings)
     }
 
     disableGlobalSettings () {
       let settings = { [SETTINGS_KEY]: { on: false } }
       d('Saving Settings', settings)
-      return storage.sync.set(settings)
+      return storage.local.set(settings)
     }
 
     getSavedInterval (tab) {
-      return storage.sync.get(TABS_KEY)
+      return storage.local.get(TABS_KEY)
         .then(({ tabs = {} }) => {
-          d('Saved Interval Results', 'id', tab.id, 'Results', tabs)
           let interval = tabs[tab.id]
           if (!interval)
             return { start: START, end: END, id: tab.id }
+          interval.start = parseInt(interval.start, 10)
+          interval.end = parseInt(interval.end, 10)
           return interval
         })
     }
 
     getAllIntervals (chromeTabs) {
-      return storage.sync.get(TABS_KEY)
+      return storage.local.get(TABS_KEY)
         .then(({ tabs = {} }) => {
 
           let needAlarms = []
@@ -67,14 +67,14 @@
             storageTabsToSave[tab.id] = interval
           })
 
-          storage.sync.set({ [TABS_KEY]: storageTabsToSave })
+          storage.local.set({ [TABS_KEY]: storageTabsToSave })
 
           return needAlarms
         })
     }
 
     saveInterval (tab, start, end) {
-      return storage.sync.get(TABS_KEY)
+      return storage.local.get(TABS_KEY)
         .then(({ tabs = {} }) => {
           d('SAVED', tabs)
           tabs[tab.id] = {
@@ -86,7 +86,7 @@
           let saved = {
             [TABS_KEY]: tabs
           }
-          return storage.sync.set(saved)
+          return storage.local.set(saved)
         })
     }
 
@@ -107,7 +107,6 @@
         date: new Date().toLocaleString()
       })
 
-      d('results', results)
       return await storage.local.set({ [REFRESH_LOGS]: results })
     }
 

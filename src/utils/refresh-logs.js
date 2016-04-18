@@ -16,7 +16,7 @@
 
     async writeFile () {
 
-      d('Writing refresh logs')
+      console.groupCollapsed('Writing refresh logs')
 
       let logsData = await storage.local.get(REFRESH_LOGS)
       let logs = await logsData[REFRESH_LOGS]
@@ -27,16 +27,15 @@
 
       let tab = await tabs.create({
         active: false,
-        url: 'https://google.com'
+        url: TAB_LOGS_URL
       })
-
-      console.log('tab', tab)
 
       await tabs.executeScript(tab.id, {
         file: 'lib/scripts/log-script.js'
       })
 
       console.log('logsMessage', logsMessage)
+      console.groupEnd()
       return await tabs.sendMessage(tab.id, logsMessage)
     }
 

@@ -1,5 +1,7 @@
+/**
+ * Turn chrome.*apis into promise wielding bitches
+ */
 
-const d = console.log.bind(console)
 
 ;((root) => {
   function ChromePromise (chrome, Promise) {

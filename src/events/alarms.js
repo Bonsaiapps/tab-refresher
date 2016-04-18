@@ -25,7 +25,8 @@
       chrome.runtime.onStartup.addListener(() => {
         // On startup all tabs can get new ids
         // So we are clearing the storage to prevent confusion
-        this.manager.clearTabStorage()
+        return this.manager.clearTabStorage()
+          .then(() => this.manager.removeAllAlarms())
       })
     }
 
@@ -34,13 +35,25 @@
       let {name} = alarm
       let match = TAB_RE.exec(name)
 
-      if (!match) return d('TAB NAME MISMATCH', name)
+      if (!match) throw new Error(`Invalid Alarm Name: ${name}`)
 
       let id = match[1]
-      this.manager.refreshTab(parseInt(id, 10))
+      this.manager.checkIfExtensionIsOn()
+        .then(() => this.manager.refreshTab(parseInt(id, 10)))
+        .catch(err => {
+          if (err.message === 'Extension is off!')
+            this.manager.removeAllAlarms()
+        })
+
     }
 
     onNewTab (tab) {
+
+      let {url, status, active} = tab
+
+      if (url === TAB_LOGS_URL && status === 'loading' && active === false)
+        return
+
       console.log('New tab opened', tab)
 
       this.manager.checkIfExtensionIsOn()
