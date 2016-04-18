@@ -13,6 +13,7 @@
     tab = null
 
     manager = new TabManager()
+    refreshLogs = new RefreshLogs()
 
     $startRange = $('#start-range')
     $endRange = $('#end-range')
@@ -21,12 +22,38 @@
     $disableAll = $('#disable-all')
     $startReset = $('#start-reset')
     $intervalVal = $('#interval-val')
-    $lastUrl = $('#last-url')
+    $viewLogs = $('#view-logs')
+    $clearLogs = $('#clear-logs')
+    $successIcon = $('.success-icon')
 
     bindEvents () {
       this.$startAll.click(ev => this.onStartAllClick())
       this.$disableAll.click(ev => this.onDisableAllClick())
       this.$startReset.click(ev => this.onStartResetClick())
+      this.$viewLogs.click(ev => this.onViewLogs())
+      this.$clearLogs.click(ev => this.onClearLogs())
+    }
+
+    onViewLogs () {
+      return this.refreshLogs.writeFile()
+        .then(() => this.showSuccessIcon())
+        .catch(err => console.error(err))
+    }
+
+    onClearLogs () {
+      return this.manager.clearLogs()
+        .then(() => this.showSuccessIcon())
+        .catch(err => console.error(err))
+    }
+    
+    showSuccessIcon () {
+      this.$successIcon.addClass('on')
+      return new Promise(resolve => {
+        setTimeout(() => {
+          this.$successIcon.removeClass('on')
+          resolve()
+        }, 2000)
+      })
     }
 
     checkCurrentRefreshTimer () {
@@ -34,8 +61,11 @@
       this.tab = null
       this.manager.getAllTabs()
         .then(tabs => {
-          let ids = tabs.map(x => x.id)
-          d('ALL IDS', ids)
+          d('Open Tabs')
+          tabs.forEach(({ id, url }) => {
+            d('id', id, url)
+          })
+          d('')
         })
       return this.manager.getActiveTab()
         .then(tab => this.tab = tab)
@@ -47,11 +77,10 @@
     }
 
     fillInRanges (interval) {
-      let {start, end, url} = interval
+      let { start, end, url } = interval
       d('start', start, end, url)
       this.$startRange.val(start)
       this.$endRange.val(end)
-      this.$lastUrl.text(url || 'None')
       return interval
     }
 
@@ -62,8 +91,8 @@
     }
 
     parseAlarmTime (alarm) {
-      d('Parsing Alarm', alarm)
-      let {scheduledTime, periodInMinutes} = alarm
+      // d('Parsing Alarm', alarm)
+      let { scheduledTime, periodInMinutes } = alarm
       this.$intervalVal.text(`${periodInMinutes}m`)
       let timeSpan = countdown(scheduledTime, new Date().getTime(), countdown.HOURS | countdown.MINUTES | countdown.SECONDS)
       this.$refreshVal.text(timeSpan.toString(4))
@@ -78,12 +107,16 @@
         .then(() => this.manager.getAllTabs())
         .then(tabs => this.manager.getAllIntervals(tabs))
         .then(tabIntervals => this.manager.createAlarms(tabIntervals))
+        .then(() => this.showSuccessIcon())
+
     }
 
-    onDisableAllClick () {
-      return this.manager.disableGlobalSettings()
-        .then(() => this.manager.removeAllAlarms())
-        .then(() => this.clearValues())
+    async onDisableAllClick () {
+      await this.manager.disableGlobalSettings()
+      await this.manager.removeAllAlarms()
+      await this.clearValues()
+      await this.manager.clearTabStorage()
+      return await this.showSuccessIcon()
     }
 
     onStartResetClick () {
@@ -94,6 +127,7 @@
         .then(interval => this.manager.createAlarm(interval))
         .then(() => this.manager.getAlarm(this.tab))
         .then(alarm => this.parseAlarmTime(alarm))
+        .then(() => this.showSuccessIcon())
     }
 
   }

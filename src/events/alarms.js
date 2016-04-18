@@ -22,6 +22,11 @@
 
       chrome.alarms.onAlarm.addListener(alarm => this.onTabAlarmFired(alarm))
       chrome.tabs.onCreated.addListener(tab => this.onNewTab(tab))
+      chrome.runtime.onStartup.addListener(() => {
+        // On startup all tabs can get new ids
+        // So we are clearing the storage to prevent confusion
+        this.manager.clearTabStorage()
+      })
     }
 
     onTabAlarmFired (alarm) {

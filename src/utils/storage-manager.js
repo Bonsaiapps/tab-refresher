@@ -7,21 +7,21 @@
 
 (() => {
 
+  const VALID_TYPES = ['after', 'before']
   const SETTINGS_KEY = 'settings'
   const TABS_KEY = 'tabs'
+  const REFRESH_LOGS = 'refresh-logs'
 
   const START = 1
   const END = 360
 
-  const LOGGING_URL = 'http://py1.systemadmin.com:5020/log'
-
-  let {storage} = chrome.promise
+  let { storage } = chrome.promise
 
   class StorageManager {
 
     checkIfExtensionIsOn () {
       return storage.sync.get(SETTINGS_KEY)
-        .then(({settings = {}}) => {
+        .then(({ settings = {} }) => {
           d('Storage Settings Response', settings)
           if (!settings.on)
             throw new Error('Extension is off!')
@@ -43,7 +43,7 @@
 
     getSavedInterval (tab) {
       return storage.sync.get(TABS_KEY)
-        .then(({tabs = {}}) => {
+        .then(({ tabs = {} }) => {
           d('Saved Interval Results', 'id', tab.id, 'Results', tabs)
           let interval = tabs[tab.id]
           if (!interval)
@@ -54,7 +54,7 @@
 
     getAllIntervals (chromeTabs) {
       return storage.sync.get(TABS_KEY)
-        .then(({tabs = {}}) => {
+        .then(({ tabs = {} }) => {
 
           let needAlarms = []
           let storageTabsToSave = {}
@@ -75,7 +75,7 @@
 
     saveInterval (tab, start, end) {
       return storage.sync.get(TABS_KEY)
-        .then(({tabs = {}}) => {
+        .then(({ tabs = {} }) => {
           d('SAVED', tabs)
           tabs[tab.id] = {
             start,
@@ -90,34 +90,35 @@
         })
     }
 
-    saveTabUrl (id) {
-      let _tab
-      return chrome.promise.tabs.get(id)
-        .then(tab => {
-          _tab = tab
-          return storage.sync.get(TABS_KEY)
-            .then(({tabs = {}}) => {
-              d('SAVED', tabs)
-              tabs[tab.id].url = tab.url
-              let saved = {
-                [TABS_KEY]: tabs
-              }
-              return storage.sync.set(saved)
-            })
-            .then(() => this.logRequest(_tab, true))
-        })
-        .then(() => _tab)
+    async saveTabRefresh (id, type = 'before') {
+
+      if (!VALID_TYPES.includes(type)) throw new Error('Type not valid. ' + type + ' given.')
+
+      let tab = await chrome.promise.tabs.get(id)
+
+      let resultObject = await storage.local.get(REFRESH_LOGS)
+
+      let results = await resultObject[REFRESH_LOGS] || []
+
+      results.push({
+        type,
+        tab_id: tab.id,
+        url: tab.url,
+        date: new Date().toLocaleString()
+      })
+
+      d('results', results)
+      return await storage.local.set({ [REFRESH_LOGS]: results })
     }
 
-    logRequest (tab, before) {
-      d('logging for tab', tab.id)
-      let data = { url: tab.url, tab_id: tab.id }
-      if (before)
-        data['before'] = true
-      else
-        data['after'] = true
-      return $.get(LOGGING_URL, data)
+    clearTabStorage () {
+      return storage.local.remove(TABS_KEY)
     }
+
+    clearLogs () {
+      return storage.local.remove(REFRESH_LOGS)
+    }
+
   }
 
   window.StorageManager = StorageManager

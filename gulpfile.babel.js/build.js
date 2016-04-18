@@ -14,7 +14,11 @@ gulp.task('build', gulp.parallel(babel, statics, vendors))
 
 
 export function babel () {
-  return gulp.src(paths.src('**/*.js'))
+  let src = [
+    paths.src('**/*.js'),
+    paths.src('vendor/**/*.js', true)
+  ]
+  return gulp.src(src)
     .pipe(gulpBabel({
       presets: ["es2015", "stage-0"]
     }))

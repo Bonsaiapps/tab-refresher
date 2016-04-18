@@ -6,7 +6,8 @@
   "permissions": [
     "tabs",
     "storage",
-    "alarms"
+    "alarms",
+    "<all_urls>"
   ],
   "browser_action": {
     "default_icon": "lib/img/icon48.png",
@@ -20,6 +21,7 @@
   },
   "background": {
     "scripts": [
+      "lib/vendor/babel-polyfill.js",
       "lib/node_modules/jquery/dist/jquery.js",
       "lib/globals/chrome-promise.js",
       "lib/utils/storage-manager.js",

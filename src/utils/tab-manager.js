@@ -9,7 +9,6 @@
 
 
   const ACTIVE_QUERY = {
-    currentWindow: true,
     status: 'complete',
     active: true
   }
@@ -54,7 +53,7 @@
 
     createAlarm (interval) {
       this.cleanInterval(interval)
-      let {start, end, id} = interval
+      let { start, end, id } = interval
       let name = `tab-${id}`
       let period = this.generateMinutes(start, end)
       d('Creating Alarm', name, start, end, id, period)
@@ -87,15 +86,10 @@
     }
 
     refreshTab (id) {
-      let _tab
-      return this.saveTabUrl(id)
-        .then(tab => _tab = tab)
-        .then(() => chrome.promise.tabs.reload(id))
-        .then(() => {
-          d(`tab-${id} was reloaded!`)
-          return this.logRequest(_tab)
 
-        })
+      return this.saveTabRefresh(id)
+        .then(() => chrome.promise.tabs.reload(id))
+        .then(() => this.saveTabRefresh(id, 'after'))
     }
   }
 

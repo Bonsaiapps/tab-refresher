@@ -1,11 +1,3 @@
-#countdown {
-  display: none;
-}
-
-.main {
-  min-width: 200px;
-  margin-top: 15px;
-}
 /*!
  * Bootstrap v3.3.6 (http://getbootstrap.com)
  * Copyright 2011-2015 Twitter, Inc.
@@ -6765,4 +6757,46 @@ button.close {
     display: none !important;
   }
 }
-/*# sourceMappingURL=bootstrap.css.map */
+
+
+.main {
+  min-width: 200px;
+  margin: 15px 0;
+}
+
+.inline {
+  display: inline-block !important;
+  color: #737373;
+}
+
+hr {
+  margin: 10px 0;
+}
+
+.header {
+  margin-bottom: 0;
+}
+
+h5 {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.btn-sm {
+  font-weight: 500;
+}
+
+.btn-space {
+  margin-bottom: 10px;
+}
+
+.success-icon {
+  position: absolute;
+  right: 15px;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.success-icon.on {
+  opacity: 1;
+}
