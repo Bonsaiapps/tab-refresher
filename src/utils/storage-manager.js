@@ -9,8 +9,9 @@
 
   const VALID_TYPES = ['after', 'before']
   const SETTINGS_KEY = 'settings'
-  const TABS_KEY = 'tabs'
-  const REFRESH_LOGS = 'refresh-logs'
+  const TABS_KEY = 'tabloids'
+  const REFRESH_LOGS = 'refreshLogs'
+  const INTERVAL_KEY = 'intervals'
 
   const START = 1
   const END = 360
@@ -19,37 +20,48 @@
 
   class StorageManager {
 
-    checkIfExtensionIsOn () {
-      return storage.local.get(SETTINGS_KEY)
-        .then(({ settings = {} }) => {
-          if (!settings.on)
-            throw new Error('Extension is off!')
-          return true
-        })
+    async areAllEnabled () {
+      let data = await storage.local.get({ [SETTINGS_KEY]: { enabled: false } })
+      return data[SETTINGS_KEY].enabled
     }
 
-    saveGlobalSettings () {
-      let settings = { [SETTINGS_KEY]: { on: true } }
-      d('Saving Settings', settings)
-      return storage.local.set(settings)
+    async isTabEnabled (id) {
+      let data = await storage.local.get({ [TABS_KEY]: { [id]: {} } })
+      return data[TABS_KEY][id].enabled
     }
 
-    disableGlobalSettings () {
-      let settings = { [SETTINGS_KEY]: { on: false } }
-      d('Saving Settings', settings)
-      return storage.local.set(settings)
+    async canTabProceed (id) {
+      return await this.areAllEnabled() || await this.isTabEnabled(id)
     }
 
-    getSavedInterval (tab) {
-      return storage.local.get(TABS_KEY)
-        .then(({ tabs = {} }) => {
-          let interval = tabs[tab.id]
-          if (!interval)
-            return { start: START, end: END, id: tab.id }
-          interval.start = parseInt(interval.start, 10)
-          interval.end = parseInt(interval.end, 10)
-          return interval
-        })
+    disableTab (id) {
+      return this.enableTab(id, false)
+    }
+
+    async enableTab (id, on = true) {
+      let data = await storage.local.get({ [TABS_KEY]: { [id]: {} } })
+      data[TABS_KEY][id].enabled = on
+      return storage.local.set(data)
+    }
+
+    enableAll (on = true) {
+      d('Set global to: %c%s', BOLD, on ? 'enabled' : 'disabled')
+      return storage.local.set({ [SETTINGS_KEY]: { enabled: on } })
+    }
+
+    disableAll () {
+      return this.enableAll(false)
+    }
+
+    async getSavedInterval (tab) {
+      let data = await storage.local.get({ [INTERVAL_KEY]: {} })
+      return await data[INTERVAL_KEY][tab.id] || this._defaultInterval(tab)
+    }
+
+    _defaultInterval (tab) {
+      let id = tab.id
+      let [start, end] = [START, END]
+      return { id, start, end }
     }
 
     getAllIntervals (chromeTabs) {
@@ -73,21 +85,23 @@
         })
     }
 
-    saveInterval (tab, start, end) {
-      return storage.local.get(TABS_KEY)
-        .then(({ tabs = {} }) => {
-          d('SAVED', tabs)
-          tabs[tab.id] = {
-            start,
-            end,
-            id: tab.id
-          }
+    async saveInterval (tab, start, end) {
+      let { id, url } = tab
+      start = parseInt(start, 10)
+      end = parseInt(end, 10)
 
-          let saved = {
-            [TABS_KEY]: tabs
-          }
-          return storage.local.set(saved)
-        })
+      if (isNaN(start) || isNaN(end))
+        throw new Error('Range values must be integers')
+
+      if (!start) start = 1
+      if (!end) end = 1
+
+      let data = await storage.local.get({ [INTERVAL_KEY]: {} })
+      let interval = { id, url, start, end }
+      data[INTERVAL_KEY][tab.id] = interval
+      await storage.local.set(data)
+
+      return interval
     }
 
     async saveTabRefresh (id, type = 'before') {

@@ -30,7 +30,7 @@
       })
     }
 
-    onTabAlarmFired (alarm) {
+    async onTabAlarmFired (alarm) {
       d('alarm', alarm)
       let {name} = alarm
       let match = TAB_RE.exec(name)
@@ -38,13 +38,11 @@
       if (!match) throw new Error(`Invalid Alarm Name: ${name}`)
 
       let id = match[1]
-      this.manager.checkIfExtensionIsOn()
-        .then(() => this.manager.refreshTab(parseInt(id, 10)))
-        .catch(err => {
-          if (err.message === 'Extension is off!')
-            this.manager.removeAllAlarms()
-        })
+      let enabled = await this.manager.canTabProceed(id)
+      if (!enabled)
+        return this.manager.removeAllAlarms()
 
+      return await this.manager.refreshTab(parseInt(id, 10))
     }
 
     onNewTab (tab) {

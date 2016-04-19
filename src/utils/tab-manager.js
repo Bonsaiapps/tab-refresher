@@ -10,31 +10,33 @@
 
   const ACTIVE_QUERY = {
     status: 'complete',
-    active: true
+    active: true,
+    currentWindow: true
   }
 
   const ALL_TABS_QUERY = {
     status: 'complete'
   }
 
+  const cTabs = chrome.promise.tabs
+  const cAlarms = chrome.promise.alarms
+
   class TabManager extends StorageManager {
 
 
-    getActiveTab () {
+    async getActiveTab () {
 
-      return chrome.promise.tabs.query(ACTIVE_QUERY)
-        .then((tabs = []) => {
-          if (!tabs.length)
-            throw new Error('No active tab!')
+      let tabs = await cTabs.query(ACTIVE_QUERY) || []
+      if (!tabs.length)
+        throw new Error('No active tab!')
 
-          return tabs[0]
-        })
+      return tabs[0]
     }
 
     logTabs (tabs, header) {
       console.groupCollapsed(header)
       tabs.forEach(tab => {
-        let {id, url} = tab
+        let { id, url } = tab
         d('%cid%c %d %curl%c %s', BOLD, NORMAL, id, BOLD, NORMAL, url)
       })
       d('')
@@ -67,10 +69,12 @@
       let { start, end, id } = interval
       let name = `tab-${id}`
       let period = this.generateMinutes(start, end)
-      d('Creating Alarm', name, start, end, id, period)
+
+      d('%cNew Alarm - Name:%c %s %cRange:%c %d-%d %cPeriod:%c %d',
+        BOLD, NORMAL, name, BOLD, NORMAL, start, end, BOLD, NORMAL, period)
 
       let alarmInfo = {
-        delayInMinutes: period,
+        // when: new Date().getTime() + 4000
         periodInMinutes: period
       }
 
@@ -81,17 +85,21 @@
       return Math.floor((Math.random() * (end - start)) + start)
     }
 
-    getAlarm (tab) {
+    async getAlarm (tab) {
       let name = `tab-${tab.id}`
-      return chrome.promise.alarms.get(name)
-        .then(alarm => {
-          if (!alarm) throw new Error('Invalid alarm name ' + name)
-          return alarm
-        })
+      let alarm = await cAlarms.get(name)
+      if (!alarm) throw new Error('Invalid alarm name ' + name)
+      return alarm
     }
 
     removeAllAlarms () {
       return chrome.promise.alarms.clearAll()
+    }
+
+    removeAlarm (tab) {
+      let {id} = tab
+      let name = `tab-${id}`
+      return cAlarms.clear(name)
     }
 
     refreshTab (id) {
