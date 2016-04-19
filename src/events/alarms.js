@@ -41,8 +41,10 @@
       let enabled = await this.manager.canTabProceed(id)
       if (!enabled)
         return this.manager.removeAllAlarms()
-
-      return await this.manager.refreshTab(parseInt(id, 10))
+      id = parseInt(id, 10)
+      chrome.runtime.sendMessage({event: events.ON_REFRESH, id: id})
+      let resp = await this.manager.refreshTab(id)
+      return resp
     }
 
     onNewTab (tab) {

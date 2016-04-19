@@ -37,6 +37,7 @@
     "gulp-npm-files": "git://github.com/hitchcockwill/gulp-npm-files#develop"
   },
   "dependencies": {
+    "countdown": "^2.6.0",
     "jquery": "^2.2.3"
   }
 }

@@ -7,7 +7,11 @@ const d = console.log.bind(console)
 const BOLD = 'font-weight: bold;'
 const NORMAL = 'font-weight: normal;'
 const TAB_LOGS_URL = 'https://google.com/'
+const REFRESH_LOGS = 'refreshLogs'
 
+const events = {
+  ON_REFRESH: 'on-refresh'
+}
 
 const types = {
   UNDEF: 'undefined',

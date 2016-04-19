@@ -25,5 +25,3 @@ All work should be done on the develop branch, including commands below.
 
 ### Todo
 - [ ] Network status
-- [ ] Save interval on Disable All
-- [ ] Refresh counter counting up???

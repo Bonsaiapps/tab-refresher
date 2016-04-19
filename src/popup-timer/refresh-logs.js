@@ -8,8 +8,6 @@
 
 (() => {
 
-  const REFRESH_LOGS = 'refresh-logs'
-
   let {storage, tabs} = chrome.promise
 
   class RefreshLogs {
@@ -18,12 +16,12 @@
 
       console.groupCollapsed('Writing refresh logs')
 
-      let logsData = await storage.local.get(REFRESH_LOGS)
+      let logsData = await storage.local.get({[REFRESH_LOGS]: []})
       let logs = await logsData[REFRESH_LOGS]
 
       console.log('logs', logs)
 
-      let logsMessage = await JSON.stringify(logs) || '[]'
+      let logsMessage = await JSON.stringify(logs)
 
       let tab = await tabs.create({
         active: false,
@@ -34,9 +32,9 @@
         file: 'lib/scripts/log-script.js'
       })
 
-      console.log('logsMessage', logsMessage)
       console.groupEnd()
-      return await tabs.sendMessage(tab.id, logsMessage)
+      tabs.sendMessage(tab.id, logsMessage)
+      return tab
     }
 
   }

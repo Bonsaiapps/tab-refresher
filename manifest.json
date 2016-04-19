@@ -22,9 +22,9 @@
   "background": {
     "scripts": [
       "lib/vendor/babel-polyfill.js",
+      "lib/vendor/chrome-promise.js",
       "lib/node_modules/jquery/dist/jquery.js",
-      "lib/globals/chrome-promise.js",
-      "lib/globals/utils.js",
+      "lib/utils/utils.js",
       "lib/utils/storage-manager.js",
       "lib/utils/tab-manager.js",
       "lib/events/alarms.js"

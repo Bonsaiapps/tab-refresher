@@ -10,7 +10,6 @@
   const VALID_TYPES = ['after', 'before']
   const SETTINGS_KEY = 'settings'
   const TABS_KEY = 'tabloids'
-  const REFRESH_LOGS = 'refreshLogs'
   const INTERVAL_KEY = 'intervals'
 
   const START = 1
@@ -42,11 +41,13 @@
       let data = await storage.local.get({ [TABS_KEY]: { [id]: {} } })
       data[TABS_KEY][id].enabled = on
       return storage.local.set(data)
+        .catch(err => this.clearLogs())
     }
 
     enableAll (on = true) {
       d('Set global to: %c%s', BOLD, on ? 'enabled' : 'disabled')
       return storage.local.set({ [SETTINGS_KEY]: { enabled: on } })
+        .catch(err => this.clearLogs())
     }
 
     disableAll () {
@@ -80,6 +81,7 @@
           })
 
           storage.local.set({ [TABS_KEY]: storageTabsToSave })
+            .catch(err => this.clearLogs())
 
           return needAlarms
         })
@@ -99,7 +101,12 @@
       let data = await storage.local.get({ [INTERVAL_KEY]: {} })
       let interval = { id, url, start, end }
       data[INTERVAL_KEY][tab.id] = interval
-      await storage.local.set(data)
+
+      try {
+        await storage.local.set(data)
+      } catch (e) {
+        this.clearLogs()
+      }
 
       return interval
     }
@@ -120,7 +127,7 @@
         url: tab.url,
         date: new Date().toLocaleString()
       })
-
+      
       return await storage.local.set({ [REFRESH_LOGS]: results })
     }
 

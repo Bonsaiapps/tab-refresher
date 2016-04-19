@@ -6,9 +6,9 @@
 $(() => {
 
   let popup = new PopupTimer()
+  popup.formatCountdown()
   popup.bindEvents()
   popup.checkCurrentRefreshTimer()
-    .then(() => popup.setEnabledStatus())
     .catch(err => {
       console.warn(err)
       popup.clearValues()

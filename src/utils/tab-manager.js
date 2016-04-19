@@ -43,7 +43,7 @@
     }
 
     async getAllTabs (header) {
-      let tabs = await chrome.promise.tabs.query(ALL_TABS_QUERY)
+      let tabs = await cTabs.query(ALL_TABS_QUERY)
       if (header) this.logTabs(tabs, header)
       return tabs
     }
@@ -93,7 +93,7 @@
     }
 
     removeAllAlarms () {
-      return chrome.promise.alarms.clearAll()
+      return cAlarms.clearAll()
     }
 
     removeAlarm (tab) {
@@ -105,8 +105,9 @@
     refreshTab (id) {
 
       return this.saveTabRefresh(id)
-        .then(() => chrome.promise.tabs.reload(id))
+        .then(() => cTabs.reload(id))
         .then(() => this.saveTabRefresh(id, 'after'))
+        .catch(err => this.clearLogs())
     }
   }
 
