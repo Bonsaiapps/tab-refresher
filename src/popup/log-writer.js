@@ -1,3 +1,5 @@
+import { TAB_LOGS_URL, REFRESH_LOGS } from '../shared/constants'
+
 /**
  * Keeper and Writer of refresh logs
  *
@@ -5,38 +7,34 @@
  * @version 4/15/16 2:59 PM
  */
 
+let { storage, tabs } = chrome.promise
 
-(() => {
+export class LogWriter {
 
-  let {storage, tabs} = chrome.promise
+  async writeFile () {
 
-  class LogWriter {
+    console.groupCollapsed('Writing refresh logs')
 
-    async writeFile () {
+    let logsData = await storage.local.get({ [REFRESH_LOGS]: [] })
+    let logs = await logsData[REFRESH_LOGS]
 
-      console.groupCollapsed('Writing refresh logs')
+    console.log('logs', logs)
 
-      let logsData = await storage.local.get({[REFRESH_LOGS]: []})
-      let logs = await logsData[REFRESH_LOGS]
+    let logsMessage = await JSON.stringify(logs)
 
-      console.log('logs', logs)
+    let tab = await tabs.create({
+      active: false,
+      url: TAB_LOGS_URL
+    })
 
-      let logsMessage = await JSON.stringify(logs)
+    await tabs.executeScript(tab.id, {
+      file: 'lib/scripts/log-script.js'
+    })
 
-      let tab = await tabs.create({
-        active: false,
-        url: TAB_LOGS_URL
-      })
-
-      await tabs.executeScript(tab.id, {
-        file: 'lib/scripts/log-script.js'
-      })
-
-      console.groupEnd()
-      tabs.sendMessage(tab.id, logsMessage)
-      return tab
-    }
-
+    console.groupEnd()
+    tabs.sendMessage(tab.id, logsMessage)
+    return tab
   }
 
-})()
+}
+

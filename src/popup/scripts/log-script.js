@@ -5,9 +5,7 @@
  * @version 4/17/16 1:51 PM
  */
 
-
 (() => {
-
   class LogScript {
 
     registerEvents () {

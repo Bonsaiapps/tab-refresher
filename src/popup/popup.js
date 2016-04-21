@@ -1,220 +1,196 @@
+import $ from 'jquery'
+import * as debug from 'debug'
+import * as countdown from 'countdown'
+import { BOLD, NORMAL } from '../shared/constants'
+import { SharedApi } from '../shared/shared-api'
+import { LogWriter } from './log-writer'
+
+
 /**
  * @author john
  * @version 12/29/15 6:09 AM
  */
 
-(() => {
+let d = debug('app:popup')
+const SUCCESS_ICON_FADE = 2000
+const UNITS = countdown.HOURS | countdown.MINUTES | countdown.SECONDS
 
-  const SUCCESS_ICON_FADE = 2000
 
-  class PopupTimer {
+export class PopupTimer {
 
-    timeoutId = null
-    units = countdown.HOURS | countdown.MINUTES | countdown.SECONDS
+  tab = null
+  timeoutId = null
 
-    manager = new TabManager()
-    logWriter = new LogWriter()
+  api = new SharedApi()
+  logWriter = new LogWriter()
 
-    $startRange = $('#start-range')
-    $endRange = $('#end-range')
-    $refreshVal = $('#refresh-val')
-    $startAll = $('#start-all')
-    $disableAll = $('#disable-all')
-    $startTab = $('#start-tab')
-    $disableTab = $('#disable-tab')
-    $intervalVal = $('#interval-val')
-    $viewLogs = $('#view-logs')
-    $clearLogs = $('#clear-logs')
-    $successIcon = $('.success-icon')
-    $thisTab = $('#this-tab')
-    $allTabs = $('#all-tabs')
+  $startRange = $('#start-range')
+  $endRange = $('#end-range')
+  $refreshVal = $('#refresh-val')
+  $intervalVal = $('#interval-val')
+  $successIcon = $('.success-icon')
+  $thisTab = $('#this-tab')
+  $allTabs = $('#all-tabs')
 
-    constructor () {
-      chrome.runtime.onMessage.addListener(request => {
-        if (request.event === events.ON_REFRESH) this.onRefresh(request.id)
-      })
-    }
+  bindEvents () {
+    chrome.runtime.onMessage.addListener(req => this[req.event](req.id))
 
-    async onRefresh (id) {
-      this.clearValues()
-      let tab = await chrome.promise.tabs.get(id)
-      let alarm = await this.manager.getAlarm(tab)
-      this.parseAlarmTime(alarm)
-      this.setEnabledStatus(id)
-    }
+    $('#start-all').click(ev => this.onStartAllClick())
+    $('#disable-all').click(ev => this.onDisableAllClick())
+    $('#start-tab').click(ev => this.onStartTab())
+    $('#disable-tab').click(ev => this.onDisableTab())
+    $('#view-logs').click(ev => this.onViewLogs())
+    $('#clear-logs').click(ev => this.onClearLogs())
+  }
 
-    bindEvents () {
-      this.$startAll.click(ev => this.onStartAllClick())
-      this.$disableAll.click(ev => this.onDisableAllClick())
-      this.$startTab.click(ev => this.onStartTab())
-      this.$disableTab.click(ev => this.onDisableTab())
-      this.$viewLogs.click(ev => this.onViewLogs())
-      this.$clearLogs.click(ev => this.onClearLogs())
-    }
+  async checkCurrentRefreshTimer () {
 
-    async checkCurrentRefreshTimer () {
+    await this.api.getAllTabs('Starting Tabs')
 
-      await this.manager.getAllTabs('Starting Tabs')
+    this.tab = await this.api.getActiveTab()
 
-      let tab = await this.manager.getActiveTab()
+    let interval = await this.api.getSavedInterval(this.tab)
+    this.fillInRanges(interval)
 
-      let interval = await this.manager.getSavedInterval(tab)
-      this.fillInRanges(interval)
-
-      if (!await this.manager.canTabProceed(tab.id)) {
-        this.setEnabledStatus(tab.id)
-        return console.warn('Extension is disabled')
-      }
-
-      let alarm = await this.manager.getAlarm(tab)
-      this.parseAlarmTime(alarm)
-      this.setEnabledStatus(tab.id)
-      return alarm
-    }
-
-    async onStartTab () {
-      this.clearValues()
-
-      let tab = await this.manager.getActiveTab()
-
-      await this.startSingleTab(tab, this.$startRange.val(), this.$endRange.val())
-
-      let alarm = await this.manager.getAlarm(tab)
-      this.parseAlarmTime(alarm)
-      this.showSuccessIcon()
-      this.setEnabledStatus(tab.id)
-      return alarm
-    }
-
-    async onDisableTab () {
-      this.clearValues()
-      let tab = await this.manager.getActiveTab()
-      await this.manager.disableTab(tab.id)
-      await this.manager.removeAlarm(tab)
-      this.showSuccessIcon()
-      this.setEnabledStatus(tab.id)
-    }
-
-    async startSingleTab (tab, start, end) {
-      await this.manager.enableTab(tab.id)
-
-      let interval = await this.manager.saveInterval(tab, start, end)
-      return await this.manager.createAlarm(interval)
-    }
-
-    async onStartAllClick () {
-      await this.manager.enableAll()
-      let currentTab = await this.manager.getActiveTab()
-      let tabs = this.manager.getAllTabs('All Tabs Enabled')
-
-      let currentAlarm
-      for (let tab of tabs) {
-        let interval = await this.manager.getSavedInterval(tab)
-        let alarm = await this.startSingleTab(tab, interval.start, interval.end)
-        if (tab.id === currentTab.id)
-          currentAlarm = alarm
-      }
-
-      this.parseAlarmTime(currentAlarm)
-      this.showSuccessIcon()
+    if (!await this.api.canTabProceed(this.tab.id)) {
       this.setEnabledStatus()
-      return tabs
+      return console.warn('Extension is disabled')
     }
 
-    async onDisableAllClick () {
-      this.clearValues()
-      await this.manager.disableAll()
-      await this.manager.removeAllAlarms()
-      await this.manager.clearTabStorage()
-      this.setEnabledStatus()
-      return await this.showSuccessIcon()
+    let alarm = await this.api.getAlarm(this.tab)
+    this.parseAlarmTime(alarm)
+    this.setEnabledStatus()
+    return alarm
+  }
+
+  async reloadPopup (id) {
+    this.clearValues()
+    this.tab = await this.api.getTab(id)
+    let alarm = await this.api.getAlarm(this.tab)
+    this.parseAlarmTime(alarm)
+    this.setEnabledStatus(id)
+  }
+
+  async onStartTab () {
+    this.clearValues()
+
+    await this.startSingleTab(this.tab, this.$startRange.val(), this.$endRange.val())
+
+    let alarm = await this.api.getAlarm(this.tab)
+    this.parseAlarmTime(alarm)
+    this.showSuccessIcon()
+    return alarm
+  }
+
+  async onDisableTab () {
+    this.clearValues()
+    await this.api.disableTab(this.tab.id)
+    await this.api.removeAlarm(this.tab)
+    this.showSuccessIcon()
+  }
+
+  async startSingleTab (tab, start, end) {
+    await this.api.enableTab(tab.id)
+
+    let interval = await this.api.saveInterval(tab, start, end)
+    return await this.api.createAlarm(interval)
+  }
+
+  async onStartAllClick () {
+    await this.api.enableAll()
+    let currentTab = await this.api.getActiveTab()
+    let tabs = this.api.getAllTabs('All Tabs Enabled')
+
+    let currentAlarm
+    for (let tab of tabs) {
+      let interval = await this.api.getSavedInterval(tab)
+      let alarm = await this.startSingleTab(tab, interval.start, interval.end)
+      if (tab.id === currentTab.id)
+        currentAlarm = alarm
     }
 
-    onViewLogs () {
-      return this.logWriter.writeFile()
-        .then(() => this.showSuccessIcon())
-        .catch(err => console.error(err))
-    }
+    this.parseAlarmTime(currentAlarm)
+    this.showSuccessIcon()
+    return tabs
+  }
 
-    onClearLogs () {
-      return this.manager.clearLogs()
-        .then(() => this.showSuccessIcon())
-        .catch(err => console.error(err))
-    }
+  async onDisableAllClick () {
+    this.clearValues()
+    await this.api.disableAll()
+    await this.api.removeAllAlarms()
+    await this.api.clearTabStorage()
+    return await this.showSuccessIcon()
+  }
 
-    showSuccessIcon () {
-      this.$successIcon.addClass('on')
-      return new Promise(resolve => {
-        setTimeout(() => {
-          this.$successIcon.removeClass('on')
-          resolve()
-        }, SUCCESS_ICON_FADE)
-      })
-    }
+  onViewLogs () {
+    return this.logWriter.writeFile()
+      .then(() => this.showSuccessIcon())
+      .catch(err => console.error(err))
+  }
 
-    fillInRanges (interval) {
-      let { id, start, end } = interval
+  onClearLogs () {
+    return this.api.clearLogs()
+      .then(() => this.showSuccessIcon())
+      .catch(err => console.error(err))
+  }
 
-      d('%cCurrent - id:%c %d %crange:%c %d-%d', BOLD, NORMAL, id, BOLD, NORMAL, start, end)
-      console.groupEnd()
-      this.$startRange.val(start)
-      this.$endRange.val(end)
-      return interval
-    }
+  showSuccessIcon () {
+    this.setEnabledStatus()
+    this.$successIcon.addClass('on')
+    return new Promise(resolve => {
+      setTimeout(() => {
+        this.$successIcon.removeClass('on')
+        resolve()
+      }, SUCCESS_ICON_FADE)
+    })
+  }
 
-    clearValues () {
-      clearTimeout(this.timeoutId)
-      this.$thisTab.text('')
-      this.$allTabs.text('')
-      this.$refreshVal.text('')
-      return this.$intervalVal.text('')
-    }
+  fillInRanges (interval) {
+    let { id, start, end } = interval
 
-    parseAlarmTime (alarm) {
+    d('%cCurrent - id:%c %d %crange:%c %d-%d', BOLD, NORMAL, id, BOLD, NORMAL, start, end)
+    console.groupEnd()
+    this.$startRange.val(start)
+    this.$endRange.val(end)
+    return interval
+  }
 
-      let { scheduledTime, periodInMinutes, name } = alarm
+  clearValues () {
+    clearTimeout(this.timeoutId)
+    this.$thisTab.text('')
+    this.$allTabs.text('')
+    this.$refreshVal.text('')
+    return this.$intervalVal.text('')
+  }
 
-      d('%cParsing Alarm - Name%c: %s %cPeriod%c: %d', BOLD, NORMAL, name, BOLD, NORMAL, periodInMinutes)
+  parseAlarmTime (alarm) {
 
-      this.$intervalVal.text(`${periodInMinutes}m`)
+    let { scheduledTime, periodInMinutes, name } = alarm
 
-      this.timeoutId = countdown(scheduledTime, timeSpan => this.setRefreshVal(timeSpan), this.units)
+    d('%cParsing Alarm - Name%c: %s %cPeriod%c: %d', BOLD, NORMAL, name, BOLD, NORMAL, periodInMinutes)
 
-      return alarm
-    }
+    this.$intervalVal.text(`${periodInMinutes}m`)
 
-    setRefreshVal (timeSpan) {
-      this.$refreshVal.text(timeSpan.toString())
-    }
+    this.timeoutId = countdown(scheduledTime, timeSpan => this.setRefreshVal(timeSpan), UNITS)
 
-    async setEnabledStatus (id) {
-      let tab
-      if (id)
-        tab = await chrome.promise.tabs.get(id)
-      else
-        tab = await this.manager.getActiveTab()
+    return alarm
+  }
 
-      let all = await this.manager.areAllEnabled()
-      let current = await this.manager.isTabEnabled(tab.id)
+  setRefreshVal (timeSpan) {
+    this.$refreshVal.text(timeSpan.toString())
+  }
 
-      this.$allTabs.text(str(all))
-      this.$thisTab.text(str(current))
+  async setEnabledStatus () {
 
-      function str (bool) {
-        return bool ? 'Enabled' : 'Disabled'
-      }
-    }
+    let all = await this.api.areAllEnabled()
+    let current = await this.api.isTabEnabled(this.tab.id)
 
-    formatCountdown () {
-      countdown.setFormat({
-        singular: '|s|m|h',
-        plural: '|s|m|h',
-        last: ' ',
-        delim: ' '
-      })
+    this.$allTabs.text(str(all))
+    this.$thisTab.text(str(current))
+
+    function str (bool) {
+      return bool ? 'Enabled' : 'Disabled'
     }
   }
 
-  window.PopupTimer = PopupTimer
-
-})()
+}
