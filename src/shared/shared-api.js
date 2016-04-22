@@ -1,4 +1,4 @@
-import * as debug from 'debug'
+import debug from 'debug'
 import { StorageApi } from './storage-api'
 import { BOLD, NORMAL, alarmName } from './constants'
 
@@ -9,7 +9,7 @@ import { BOLD, NORMAL, alarmName } from './constants'
  * @version 12/27/15 10:19 PM
  */
 
-let d = debug('app:shared-api')
+let d
 
 const ACTIVE_QUERY = {
   status: 'complete',
@@ -26,6 +26,11 @@ const cAlarms = chrome.promise.alarms
 
 export class SharedApi extends StorageApi {
 
+  constructor (logKey) {
+    d = debug(`app:${logKey}`)
+    super()
+  }
+
   getTab (id) {
     return cTabs.get(id)
   }
@@ -40,7 +45,6 @@ export class SharedApi extends StorageApi {
   }
 
   logTabs (tabs, header) {
-    console.groupCollapsed(header)
     tabs.forEach(tab => {
       let { id, url } = tab
       d('%cid%c %d %curl%c %s', BOLD, NORMAL, id, BOLD, NORMAL, url)
@@ -50,6 +54,8 @@ export class SharedApi extends StorageApi {
 
   async getAllTabs (header) {
     let tabs = await cTabs.query(ALL_TABS_QUERY)
+    tabs = await tabs.filter(t => !t.url.startsWith('chrome://'))
+
     if (header) this.logTabs(tabs, header)
     return tabs
   }
@@ -75,7 +81,7 @@ export class SharedApi extends StorageApi {
       BOLD, NORMAL, name, BOLD, NORMAL, start, end, BOLD, NORMAL, period)
 
     let alarmInfo = {
-      // when: new Date().getTime() + 4000
+      when: new Date().getTime() + 2000,
       periodInMinutes: period
     }
 
@@ -102,11 +108,20 @@ export class SharedApi extends StorageApi {
     return cAlarms.clear(name)
   }
 
-  refreshTab (id) {
-
-    return this.saveTabRefresh(id)
-      .then(() => cTabs.reload(id))
-      .then(() => this.saveTabRefresh(id, 'after'))
-      .catch(err => this.clearLogs())
+  clearDataOnStartup () {
+    this.clearTabStorage()
+    this.clearIntervals()
+    this.removeAllAlarms()
   }
+
+  async startSingleTab (tab, start, end) {
+    if (tab.url.startsWith('chrome://'))
+      return Promise.resolve()
+
+    await this.enableTab(tab.id)
+
+    let interval = await this.saveInterval(tab, start, end)
+    return await this.createAlarm(interval)
+  }
+
 }

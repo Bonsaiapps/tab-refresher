@@ -1,5 +1,5 @@
 import ChromePromise from 'chrome-promise'
-import * as debug from 'debug'
+import debug from 'debug'
 
 /**
  * @author john
@@ -7,15 +7,15 @@ import * as debug from 'debug'
  */
 
 window._debug = debug
-debug.cLog = cLog
-let d = debug('app:constants')
+
+debug.log = log
 
 chrome.promise = new ChromePromise()
 
 export const BOLD = 'font-weight: bold;'
 export const NORMAL = 'font-weight: normal;'
 export const TAB_LOGS_URL = 'https://google.com/'
-export const REFRESH_LOGS = 'logWriter'
+export const REFRESH_LOGS = 'logs'
 
 export const events = {
   RELOAD_POPUP: 'reloadPopup'
@@ -27,18 +27,19 @@ export function alarmName (tab) {
   return `tab-${id}-${url}`
 }
 
-const MODS = ['%b', '%n']
 
 function cLog (str) {
 
+  const MODS = ['%b', '%n']
   let len = str.length
   let params = []
 
-  for (let [index, val] of str) {
+  for (let [index, val] of str.split('').entries()) {
     if (val === '%') {
       if (index + 1 === len) continue
-
       let type = str[index + 1]
+      if (type === 'c') continue
+
       switch (type) {
         case 'b':
           params.push(BOLD)
@@ -46,12 +47,18 @@ function cLog (str) {
         case 'n':
           params.push(NORMAL)
           break
-        default:
-          console.warn(`cLog modifier not found: ${type}`)
       }
     }
   }
 
   MODS.forEach(mod => str = str.replace(mod, '%c'))
-  d(str, ...params)
+  return { str, params }
+}
+
+function log (...args) {
+  let { str, params } = cLog(args[0])
+  let len = args.length
+  args.splice(len - 1, 0, ...params)
+  args[0] = str
+  console.log(...args)
 }

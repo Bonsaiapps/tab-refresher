@@ -1,6 +1,12 @@
+import 'bootstrap-css-only'
+import 'babel-polyfill'
+
 import $ from 'jquery'
-import * as countdown from 'countdown'
+import countdown from 'countdown'
 import { PopupTimer } from './popup'
+
+import './popup.sass'
+
 
 /**
  * @author john

@@ -1,6 +1,6 @@
 import { events, TAB_LOGS_URL } from '../shared/constants'
 import { SharedApi } from '../shared/shared-api'
-import * as debug from 'debug'
+import debug from 'debug'
 import { LogQueue } from './log-queue'
 
 /**
@@ -17,19 +17,19 @@ const TAB_RE = /tab-(\d+)-.*/
 
 export class AlarmEventsPage {
 
-  api = new SharedApi()
+  api = new SharedApi('alarm-events-page')
   logQueue = new LogQueue()
 
   register () {
-    d('EventAlarms Register')
+    d('%bAlarm Events Page')
 
     chrome.alarms.onAlarm.addListener(alarm => this.onTabAlarmFired(alarm))
     chrome.tabs.onCreated.addListener(tab => this.onNewTab(tab))
     chrome.runtime.onStartup.addListener(() => {
+      d('onStartup')
       // On startup all tabs can get new ids
       // So we are clearing the storage to prevent confusion
-      return this.api.clearTabStorage()
-        .then(() => this.api.removeAllAlarms())
+      return this.api.clearDataOnStartup()
     })
   }
 
@@ -41,7 +41,7 @@ export class AlarmEventsPage {
 
     let id = match[1]
 
-    d.cLog(`%bRefreshing Tab:%n ${id} %bAlarm:%n ${name}`)
+    d(`%bRefreshing Tab:%n ${id} %bAlarm:%n ${name}`)
 
     let enabled = await this.api.isTabEnabled(id)
     if (!enabled)
@@ -61,12 +61,14 @@ export class AlarmEventsPage {
 
   onNewTab (tab) {
 
-    let { url, status, active } = tab
+    let { id, url, status, active } = tab
 
     if (url === TAB_LOGS_URL && status === 'loading' && active === false)
       return
 
-    console.log('New tab opened', tab)
+
+    d(`New Tab ${id} - ${url}`)
+    // todo: also skip on just new tab
 
     // this.api.checkIfExtensionIsOn()
     //   .then(() => this.api.getSavedInterval(tab))

@@ -1,4 +1,6 @@
+import 'babel-polyfill'
 import { AlarmEventsPage } from './alarm-events-page'
+
 
 /**
  * @author john

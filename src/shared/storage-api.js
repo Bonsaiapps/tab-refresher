@@ -1,4 +1,4 @@
-import * as debug from 'debug'
+import debug from 'debug'
 import { BOLD, REFRESH_LOGS } from './constants'
 
 /**
@@ -117,5 +117,8 @@ export class StorageApi {
   clearLogs () {
     return storage.local.remove(REFRESH_LOGS)
   }
-
+  
+  clearIntervals () {
+    return storage.local.remove(INTERVAL_KEY)
+  }
 }

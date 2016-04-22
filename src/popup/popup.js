@@ -1,6 +1,6 @@
 import $ from 'jquery'
-import * as debug from 'debug'
-import * as countdown from 'countdown'
+import debug from 'debug'
+import countdown from 'countdown'
 import { BOLD, NORMAL } from '../shared/constants'
 import { SharedApi } from '../shared/shared-api'
 import { LogWriter } from './log-writer'
@@ -21,7 +21,7 @@ export class PopupTimer {
   tab = null
   timeoutId = null
 
-  api = new SharedApi()
+  api = new SharedApi('popup')
   logWriter = new LogWriter()
 
   $startRange = $('#start-range')
@@ -41,6 +41,7 @@ export class PopupTimer {
     $('#disable-tab').click(ev => this.onDisableTab())
     $('#view-logs').click(ev => this.onViewLogs())
     $('#clear-logs').click(ev => this.onClearLogs())
+    $('#set-all-ranges').click(ev => this.onSetAllRanges())
   }
 
   async checkCurrentRefreshTimer () {
@@ -52,6 +53,8 @@ export class PopupTimer {
     let interval = await this.api.getSavedInterval(this.tab)
     this.fillInRanges(interval)
 
+    $('.success-icon').removeClass('gay')
+
     if (!await this.api.canTabProceed(this.tab.id)) {
       this.setEnabledStatus()
       return console.warn('Extension is disabled')
@@ -61,6 +64,17 @@ export class PopupTimer {
     this.parseAlarmTime(alarm)
     this.setEnabledStatus()
     return alarm
+  }
+
+  async onSetAllRanges () {
+    let start = this.$startRange.val()
+    let end = this.$endRange.val()
+    let tabs = await this.api.getAllTabs()
+    for (let tab of tabs) {
+      await this.api.saveInterval(tab, start, end)
+    }
+
+    this.showSuccessIcon()
   }
 
   async reloadPopup (id) {
@@ -74,7 +88,7 @@ export class PopupTimer {
   async onStartTab () {
     this.clearValues()
 
-    await this.startSingleTab(this.tab, this.$startRange.val(), this.$endRange.val())
+    await this.api.startSingleTab(this.tab, this.$startRange.val(), this.$endRange.val())
 
     let alarm = await this.api.getAlarm(this.tab)
     this.parseAlarmTime(alarm)
@@ -89,23 +103,15 @@ export class PopupTimer {
     this.showSuccessIcon()
   }
 
-  async startSingleTab (tab, start, end) {
-    await this.api.enableTab(tab.id)
-
-    let interval = await this.api.saveInterval(tab, start, end)
-    return await this.api.createAlarm(interval)
-  }
-
   async onStartAllClick () {
     await this.api.enableAll()
-    let currentTab = await this.api.getActiveTab()
-    let tabs = this.api.getAllTabs('All Tabs Enabled')
+    let tabs = await this.api.getAllTabs('All Tabs Enabled')
 
     let currentAlarm
     for (let tab of tabs) {
       let interval = await this.api.getSavedInterval(tab)
-      let alarm = await this.startSingleTab(tab, interval.start, interval.end)
-      if (tab.id === currentTab.id)
+      let alarm = await this.api.startSingleTab(tab, interval.start, interval.end)
+      if (tab.id === this.tab.id)
         currentAlarm = alarm
     }
 
@@ -149,7 +155,6 @@ export class PopupTimer {
     let { id, start, end } = interval
 
     d('%cCurrent - id:%c %d %crange:%c %d-%d', BOLD, NORMAL, id, BOLD, NORMAL, start, end)
-    console.groupEnd()
     this.$startRange.val(start)
     this.$endRange.val(end)
     return interval

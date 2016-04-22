@@ -9,25 +9,18 @@
     "alarms",
     "<all_urls>"
   ],
-  "browser_action": {
-    "default_icon": "icons/icon48.png",
-    "default_popup": "popup/popup.html",
-    "default_title": "Auto Tab Refresh"
-  },
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
+  "browser_action": {
+    "default_popup": "popup/index.html",
+    "default_title": "Auto Tab Refresh"
+  },
   "background": {
     "scripts": [
-      "vendor/babel-polyfill.js",
-      "vendor/chrome-promise.js",
-      "node_modules/jquery/dist/jquery.js",
-      "utils/utils.js",
-      "utils/storage-manager.js",
-      "utils/tab-manager.js",
-      "events/alarms.js"
+      "events/index.js"
     ],
     "persistent": false
   }

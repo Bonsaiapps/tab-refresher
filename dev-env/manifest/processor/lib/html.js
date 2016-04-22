@@ -1,13 +1,12 @@
 import path from 'path'
 import fs from 'fs-extra'
-
 import * as log from '../../log'
 import script from './script'
-import * as Remove from '../../../util/remove';
+import * as Remove from '../../../util/remove'
 
-const makeLayout = function({script, body}) {
+const makeLayout = function ({ script, body }) {
   return (
-`<!DOCTYPE html>
+    `<!DOCTYPE html>
 <html>
   <head>
     <meta charSet="utf-8" />
@@ -21,24 +20,26 @@ const makeLayout = function({script, body}) {
   )
 }
 
-export default function(htmlFilepath, buildPath) {
+export default function (htmlFilepath, buildPath) {
   log.pending(`Making html '${htmlFilepath}'`)
 
   // Read body content
-  const htmlContent = fs.readFileSync(path.resolve(path.join('src', htmlFilepath)), {encoding: "utf8"})
+  const htmlContent = fs.readFileSync(path.resolve(path.join('src', htmlFilepath)), { encoding: "utf8" })
 
   // Get just path and name ie: 'popup/index'
   const bareFilepath = Remove.extension(htmlFilepath)
 
   const scriptFilepath = `${bareFilepath}.js`
 
-  const webpackScriptUrl = process.env.NODE_ENV == "development" ? path.join("https://localhost:3001", scriptFilepath) : `/${scriptFilepath}`
+  const webpackScriptUrl = process.env.NODE_ENV == "development" ? `https://localhost:3001/${scriptFilepath}` : `/${scriptFilepath}`
+  console.log('webpackScriptUrl', webpackScriptUrl)
+
   const webpackScript = `<script src="${webpackScriptUrl}" async defer></script>`;
 
   script(scriptFilepath, buildPath)
 
   const html = makeLayout({
-    body:   htmlContent,
+    body: htmlContent,
     script: webpackScript
   })
 
