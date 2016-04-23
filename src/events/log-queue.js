@@ -12,6 +12,7 @@ let { storage } = chrome.promise
 export class LogQueue {
 
   queue = []
+  timeoutId = null
 
   async addLog (id, type = 'before') {
 
@@ -20,6 +21,7 @@ export class LogQueue {
       tab = await api.getTab(id)
     } catch (e) {
       console.warn(e)
+      return Promise.resolve()
     }
 
     if (!tab) return
@@ -32,7 +34,10 @@ export class LogQueue {
     })
 
     // if first log added then start timer to save all logs
-    setTimeout(() => this.saveLogs(), SAVE_DELAY)
+    if (this.queue.length == 1)
+      this.timeoutId = setTimeout(() => this.saveLogs(), SAVE_DELAY)
+
+    return tab
   }
 
   async saveLogs () {
@@ -42,6 +47,11 @@ export class LogQueue {
 
     this.queue.length = 0
 
-    return storage.local.set(data)
+    try {
+      return storage.local.set(data)
+    } catch (e) {
+      console.error(e)
+      api.clearLogs()
+    }
   }
 }

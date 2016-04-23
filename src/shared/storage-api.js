@@ -9,7 +9,7 @@ import { REFRESH_LOGS, alarmName } from './constants'
 let d = debug('app:storage-api')
 
 const SETTINGS_KEY = 'settings'
-const GLOBAL_INTERVAL_KEY = 'interval'
+const INTERVAL_KEY = 'interval'
 
 const START = 1
 const END = 360
@@ -46,13 +46,13 @@ export class StorageApi {
     start = parseInt(start, 10)
     end = parseInt(end, 10)
     let data = await storage.local.get({ [SETTINGS_KEY]: {} })
-    data[SETTINGS_KEY][GLOBAL_INTERVAL_KEY] = { start, end }
+    data[SETTINGS_KEY][INTERVAL_KEY] = { start, end }
     return await storage.local.set(data)
   }
 
   async getGlobalInterval () {
-    let data = await storage.local.get({ [SETTINGS_KEY]: { [GLOBAL_INTERVAL_KEY]: { start: START, end: END } } })
-    return data[SETTINGS_KEY][GLOBAL_INTERVAL_KEY]
+    let data = await storage.local.get({ [SETTINGS_KEY]: { [INTERVAL_KEY]: { start: START, end: END } } })
+    return data[SETTINGS_KEY][INTERVAL_KEY]
   }
 
   getStorageTabs (ids) {
@@ -107,7 +107,7 @@ export class StorageApi {
 
   async getSavedInterval (tab) {
     let data = await this.getStorageTab(tab.id)
-    return await data[tab.id][GLOBAL_INTERVAL_KEY] || this._defaultInterval(tab)
+    return await data[tab.id][INTERVAL_KEY] || this._defaultInterval(tab)
   }
 
 
@@ -122,7 +122,7 @@ export class StorageApi {
     let data = await this.getStorageTab(id)
     let interval = { id, url, start, end }
     data[id].windowId = windowId
-    data[id][GLOBAL_INTERVAL_KEY] = interval
+    data[id][INTERVAL_KEY] = interval
 
     try {
       await storage.local.set(data)

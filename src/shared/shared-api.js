@@ -92,7 +92,7 @@ export class SharedApi extends StorageApi {
       BOLD, NORMAL, name, BOLD, NORMAL, start, end, BOLD, NORMAL, period)
 
     let alarmInfo = {
-      when: new Date().getTime() + 2000,
+      // when: new Date().getTime() + 2000,
       periodInMinutes: period
     }
 
