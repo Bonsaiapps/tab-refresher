@@ -44,10 +44,10 @@ export class SharedApi extends StorageApi {
     return tabs[0]
   }
 
-  logTabs (tabs, header) {
+  logTabs (tabs) {
     tabs.forEach(tab => {
       let { id, url } = tab
-      d('%cid%c %d %curl%c %s', BOLD, NORMAL, id, BOLD, NORMAL, url)
+      d(`*bid*n ${id} *burl*n ${url}`)
     })
     d('')
   }
@@ -56,7 +56,7 @@ export class SharedApi extends StorageApi {
     let tabs = await cTabs.query(ALL_TABS_QUERY)
     tabs = await tabs.filter(t => !t.url.startsWith('chrome://'))
 
-    if (header) this.logTabs(tabs, header)
+    if (header) this.logTabs(tabs)
     return tabs
   }
 
@@ -85,7 +85,8 @@ export class SharedApi extends StorageApi {
       periodInMinutes: period
     }
 
-    return chrome.alarms.create(name, alarmInfo)
+    chrome.alarms.create(name, alarmInfo)
+    return cAlarms.get(name)
   }
 
   generateMinutes (start, end) {
@@ -115,7 +116,7 @@ export class SharedApi extends StorageApi {
   }
 
   async startSingleTab (tab, start, end) {
-    if (tab.url.startsWith('chrome://'))
+    if (tab.url.startsWith('chrome://extensions'))
       return Promise.resolve()
 
     await this.enableTab(tab.id)

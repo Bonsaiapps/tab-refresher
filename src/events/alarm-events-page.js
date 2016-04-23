@@ -13,7 +13,7 @@ import { LogQueue } from './log-queue'
 let d = debug('app:alarm-events-page')
 let cTabs = chrome.promise.tabs
 
-const TAB_RE = /tab-(\d+)-.*/
+const TAB_RE = /tab-(\d+)/
 
 export class AlarmEventsPage {
 
@@ -21,16 +21,19 @@ export class AlarmEventsPage {
   logQueue = new LogQueue()
 
   register () {
-    d('%bAlarm Events Page')
-
+    d('*bAlarm Events Page')
     chrome.alarms.onAlarm.addListener(alarm => this.onTabAlarmFired(alarm))
+    chrome.tabs.onRemoved.addListener(id => this.onTabRemoved(id))
     chrome.tabs.onCreated.addListener(tab => this.onNewTab(tab))
-    chrome.runtime.onStartup.addListener(() => {
-      d('onStartup')
-      // On startup all tabs can get new ids
-      // So we are clearing the storage to prevent confusion
-      return this.api.clearDataOnStartup()
-    })
+    // On startup all tabs can get new ids
+    // So we are clearing the storage to prevent confusion
+    chrome.runtime.onStartup.addListener(() => this.api.clearDataOnStartup())
+  }
+
+  async onTabRemoved (id) {
+    d(`Removing tab *b${id}`)
+    await this.api.disableTab(id)
+    await this.api.removeAlarm({ id })
   }
 
   async onTabAlarmFired (alarm) {
@@ -41,7 +44,7 @@ export class AlarmEventsPage {
 
     let id = match[1]
 
-    d(`%bRefreshing Tab:%n ${id} %bAlarm:%n ${name}`)
+    d(`Refreshing *b%j`, alarm)
 
     let enabled = await this.api.isTabEnabled(id)
     if (!enabled)
@@ -59,20 +62,20 @@ export class AlarmEventsPage {
       .then(() => this.logQueue.addLog(id, 'after'))
   }
 
-  onNewTab (tab) {
+  async onNewTab (tab) {
 
-    let { id, url, status, active } = tab
+    let { id, url } = tab
 
-    if (url === TAB_LOGS_URL && status === 'loading' && active === false)
+    if (url.startsWith('chrome://extensions') || url === TAB_LOGS_URL)
       return
 
+    if (!await this.api.canTabProceed(id))
+      return
 
     d(`New Tab ${id} - ${url}`)
-    // todo: also skip on just new tab
 
-    // this.api.checkIfExtensionIsOn()
-    //   .then(() => this.api.getSavedInterval(tab))
-    //   .then(interval => this.api.createAlarm(interval))
-    //   .catch(err => console.warn(err))
+
+    let { start, end } = await this.api.getGlobalInterval()
+    return await this.api.startSingleTab(tab, start, end)
   }
 }

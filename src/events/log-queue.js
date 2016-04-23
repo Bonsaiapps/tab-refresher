@@ -15,7 +15,14 @@ export class LogQueue {
 
   async addLog (id, type = 'before') {
 
-    let tab = await api.getTab(id)
+    let tab
+    try {
+      tab = await api.getTab(id)
+    } catch (e) {
+      console.warn(e)
+    }
+
+    if (!tab) return
 
     this.queue.push({
       type,

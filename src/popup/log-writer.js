@@ -28,7 +28,7 @@ export class LogWriter {
     })
 
     await tabs.executeScript(tab.id, {
-      file: 'scripts/log-script.js'
+      file: 'popup/scripts/log-script.js'
     })
 
     console.groupEnd()

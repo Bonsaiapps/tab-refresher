@@ -1,14 +1,13 @@
 import fs from 'fs-extra'
 import path from 'path'
 import _ from 'lodash'
-
 import * as paths from '../../paths'
 import * as log from '../log'
-import * as Remove from '../../util/remove';
+import * as Remove from '../../util/remove'
 
 const buildAssetsDir = "$assets"
 
-const processAsset = function(object, key, buildPath) {
+const processAsset = function (object, key, buildPath) {
   const assetPath = object[key]
 
   log.pending(`Processing asset '${assetPath}'`)
@@ -18,10 +17,10 @@ const processAsset = function(object, key, buildPath) {
   try {
     const buildAssetsDirStats = fs.lstatSync(buildAssetsDirPath);
 
-    if(!buildAssetsDirStats.isDirectory()) {
+    if (!buildAssetsDirStats.isDirectory()) {
       fs.mkdirsSync(buildAssetsDirPath)
     }
-  } catch(ex) {
+  } catch (ex) {
     fs.mkdirsSync(buildAssetsDirPath)
   }
 
@@ -31,21 +30,40 @@ const processAsset = function(object, key, buildPath) {
 
   fs.copySync(assetSrcPath, assetDestPath)
 
-  object[key] = buildAssetPath.replace(/\\/g,"/")
+  object[key] = buildAssetPath.replace(/\\/g, "/")
 
   log.done(`Done`)
 
   return true
 }
 
-export default function(manifest, {buildPath}) {
+export default function (manifest, { buildPath }) {
 
-  // Process icons
-  if (manifest.icons && Object.keys(manifest.icons).length) {
-    _.forEach(manifest.icons, (iconPath, name) => processAsset(manifest.icons, name, buildPath))
-  }
+  let { icons = {} } = manifest
 
-  // TODO can there be more assets?
+  let custom = ["popup/scripts/log-script.js"]
 
-  return {manifest}
+  // Process Icons
+  if (_.size(icons))
+    _.forEach(icons, (iconPath, name) => processAsset(icons, name, buildPath))
+
+
+  if (custom.length)
+    custom.forEach(script => processScript(script, buildPath))
+
+  return { manifest }
 }
+
+function processScript (script, buildPath) {
+
+  log.pending(`Processing script ${script}`)
+  const assetSrcPath = path.join(paths.src, script)
+  const distPath = path.join(buildPath, script)
+
+  fs.copySync(assetSrcPath, distPath)
+
+  log.done(`Done`)
+}
+
+
+

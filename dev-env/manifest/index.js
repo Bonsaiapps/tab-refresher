@@ -1,24 +1,25 @@
 import fs from 'fs-extra'
 import path from 'path'
-// import chokidar from 'chokidar'
-
 import processors from './processors'
 import * as log from './log'
+import * as paths from '../paths'
+
+// import chokidar from 'chokidar'
 
 export default class Manifest {
-  constructor({ manifest, build }) {
+  constructor ({ manifest, build }) {
     this.manifestPath = manifest
-    this.buildPath    = build
+    this.buildPath = build
   }
 
-  run() {
+  run () {
     this.prepareBuildDir()
     this.processManifest()
     this.writeManifest()
   }
 
   // Start as plugin in webpack
-  apply() {
+  apply () {
     this.run()
     // this.watch()
   }
@@ -31,24 +32,24 @@ export default class Manifest {
   //   this.processManifest()
   // }
 
-  prepareBuildDir() {
+  prepareBuildDir () {
     // Prepare clear build
     fs.removeSync(this.buildPath)
     fs.mkdirSync(this.buildPath)
   }
 
-  writeManifest() {
+  writeManifest () {
     const manifestPath = path.join(this.buildPath, "manifest.json");
     log.pending(`Making 'build/manifest.json'`)
-    fs.writeFileSync(manifestPath, JSON.stringify(this.manifest, null, 2), {encoding: 'utf8'})
+    fs.writeFileSync(manifestPath, JSON.stringify(this.manifest, null, 2), { encoding: 'utf8' })
     log.done()
   }
 
-  loadManifest() {
+  loadManifest () {
     return JSON.parse(fs.readFileSync(this.manifestPath, 'utf8'))
   }
 
-  processManifest() {
+  processManifest () {
     this.scripts = []
     this.manifest = this.loadManifest()
 
@@ -62,11 +63,12 @@ export default class Manifest {
     return true
   }
 
-  applyProcessorResult({manifest, scripts} = {}) {
-    if(manifest)
+  applyProcessorResult ({ manifest, scripts } = {}) {
+    if (manifest)
       this.manifest = manifest
+    
+    if (scripts) {
 
-    if(scripts) {
       // TODO validace na skripty
       // const pushScriptName = function(scriptName) {
       //   const scriptPath = path.join(paths.src, scriptName)
@@ -89,3 +91,4 @@ export default class Manifest {
     }
   }
 }
+

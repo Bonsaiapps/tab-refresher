@@ -1,5 +1,5 @@
 import debug from 'debug'
-import { BOLD, REFRESH_LOGS } from './constants'
+import { REFRESH_LOGS } from './constants'
 
 /**
  * @author john
@@ -12,6 +12,7 @@ const VALID_TYPES = ['after', 'before']
 const SETTINGS_KEY = 'settings'
 const TABS_KEY = 'tabloids'
 const INTERVAL_KEY = 'intervals'
+const GLOBAL_INTERVAL_KEY = 'interval'
 
 const START = 1
 const END = 360
@@ -46,13 +47,27 @@ export class StorageApi {
   }
 
   enableAll (on = true) {
-    d('Set global to: %c%s', BOLD, on ? 'enabled' : 'disabled')
+    let display = on ? 'enabled' : 'disabled'
+    d(`Set global to: *b${display}`)
     return storage.local.set({ [SETTINGS_KEY]: { enabled: on } })
       .catch(err => this.clearLogs())
   }
 
   disableAll () {
     return this.enableAll(false)
+  }
+
+  async setGlobalIntervals (start, end) {
+    start = parseInt(start, 10)
+    end = parseInt(end, 10)
+    let data = await storage.local.get({ [SETTINGS_KEY]: {} })
+    data[SETTINGS_KEY][GLOBAL_INTERVAL_KEY] = { start, end }
+    return await storage.local.set(data)
+  }
+
+  async getGlobalInterval () {
+    let data = await storage.local.get({ [SETTINGS_KEY]: { [GLOBAL_INTERVAL_KEY]: { start: START, end: END } } })
+    return data[SETTINGS_KEY][GLOBAL_INTERVAL_KEY]
   }
 
   async getSavedInterval (tab) {
@@ -117,7 +132,7 @@ export class StorageApi {
   clearLogs () {
     return storage.local.remove(REFRESH_LOGS)
   }
-  
+
   clearIntervals () {
     return storage.local.remove(INTERVAL_KEY)
   }

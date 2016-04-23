@@ -55,9 +55,9 @@ export class PopupTimer {
 
     $('.success-icon').removeClass('gay')
 
-    if (!await this.api.canTabProceed(this.tab.id)) {
+    if (!await this.api.isTabEnabled(this.tab.id)) {
       this.setEnabledStatus()
-      return console.warn('Extension is disabled')
+      return console.warn('Tab is disabled')
     }
 
     let alarm = await this.api.getAlarm(this.tab)
@@ -74,15 +74,17 @@ export class PopupTimer {
       await this.api.saveInterval(tab, start, end)
     }
 
+    await this.api.setGlobalIntervals(start, end)
     this.showSuccessIcon()
   }
 
   async reloadPopup (id) {
+    if (id !== this.tab.id)
+      return
     this.clearValues()
-    this.tab = await this.api.getTab(id)
     let alarm = await this.api.getAlarm(this.tab)
     this.parseAlarmTime(alarm)
-    this.setEnabledStatus(id)
+    this.setEnabledStatus()
   }
 
   async onStartTab () {
@@ -162,6 +164,7 @@ export class PopupTimer {
 
   clearValues () {
     clearTimeout(this.timeoutId)
+    clearInterval(this.timeoutId)
     this.$thisTab.text('')
     this.$allTabs.text('')
     this.$refreshVal.text('')
