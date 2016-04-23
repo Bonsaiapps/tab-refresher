@@ -32,8 +32,7 @@ export class AlarmEventsPage {
 
   async onTabRemoved (id) {
     d(`Removing tab *b${id}`)
-    await this.api.disableTab(id)
-    await this.api.removeAlarm({ id })
+    await this.api.removeTab(id)
   }
 
   async onTabAlarmFired (alarm) {

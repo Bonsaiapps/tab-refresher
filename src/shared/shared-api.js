@@ -54,10 +54,21 @@ export class SharedApi extends StorageApi {
 
   async getAllTabs (header) {
     let tabs = await cTabs.query(ALL_TABS_QUERY)
-    tabs = await tabs.filter(t => !t.url.startsWith('chrome://'))
+    tabs = await tabs.filter(t => !t.url.startsWith('chrome://extensions'))
 
     if (header) this.logTabs(tabs)
     return tabs
+  }
+
+  async disableAll () {
+    this.enableAll(false)
+    let tabs = await this.getAllTabs()
+    let storageTabs = await this.getStorageTabs(tabs.map(x => x.id + ''))
+
+    for (let key in storageTabs)
+      if (storageTabs.hasOwnProperty(key)) storageTabs[key].enabled = false
+
+    return this.saveStorageTabs(storageTabs)
   }
 
   cleanInterval (interval) {
@@ -110,8 +121,6 @@ export class SharedApi extends StorageApi {
   }
 
   clearDataOnStartup () {
-    this.clearTabStorage()
-    this.clearIntervals()
     this.removeAllAlarms()
   }
 

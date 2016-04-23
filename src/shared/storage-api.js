@@ -1,5 +1,5 @@
 import debug from 'debug'
-import { REFRESH_LOGS } from './constants'
+import { REFRESH_LOGS, alarmName } from './constants'
 
 /**
  * @author john
@@ -21,29 +21,17 @@ let { storage } = chrome.promise
 
 export class StorageApi {
 
+  /**
+   * Global Methods
+   */
+
   async areAllEnabled () {
     let data = await storage.local.get({ [SETTINGS_KEY]: { enabled: false } })
     return data[SETTINGS_KEY].enabled
   }
 
-  async isTabEnabled (id) {
-    let data = await storage.local.get({ [TABS_KEY]: { [id]: {} } })
-    return data[TABS_KEY][id].enabled
-  }
-
   async canTabProceed (id) {
     return await this.areAllEnabled() || await this.isTabEnabled(id)
-  }
-
-  disableTab (id) {
-    return this.enableTab(id, false)
-  }
-
-  async enableTab (id, on = true) {
-    let data = await storage.local.get({ [TABS_KEY]: { [id]: {} } })
-    data[TABS_KEY][id].enabled = on
-    return storage.local.set(data)
-      .catch(err => this.clearLogs())
   }
 
   enableAll (on = true) {
@@ -53,8 +41,8 @@ export class StorageApi {
       .catch(err => this.clearLogs())
   }
 
-  disableAll () {
-    return this.enableAll(false)
+  clearLogs () {
+    return storage.local.remove(REFRESH_LOGS)
   }
 
   async setGlobalIntervals (start, end) {
@@ -70,31 +58,64 @@ export class StorageApi {
     return data[SETTINGS_KEY][GLOBAL_INTERVAL_KEY]
   }
 
-  async getSavedInterval (tab) {
-    let data = await storage.local.get({ [INTERVAL_KEY]: {} })
-    return await data[INTERVAL_KEY][tab.id] || this._defaultInterval(tab)
+  getStorageTabs (ids) {
+    return storage.local.get(ids)
+  }
+  
+  saveStorageTabs (storageTabs) {
+    return storage.local.set(storageTabs)
   }
 
-  _defaultInterval (tab) {
-    let id = tab.id
-    let [start, end] = [START, END]
-    return { id, start, end }
+  /**
+   * Single Tab Methods
+   */
+
+  removeTab (id) {
+    return storage.local.remove(id + '')
+      .then(() => chrome.promise.alarms.clear(alarmName({ id })))
   }
+
+  getStorageTab (id) {
+    return storage.local.get({ [id]: {} })
+  }
+
+  async isTabEnabled (id) {
+    let data = await this.getStorageTab(id)
+    return data[id].enabled
+  }
+
+  disableTab (id) {
+    return this.enableTab(id, false)
+  }
+
+  async enableTab (id, on = true) {
+    let data = await this.getStorageTab(id)
+    data[id].enabled = on
+    return storage.local.set(data)
+      .catch(err => this.clearLogs())
+  }
+
+  /**
+   * Single Interval Methods
+   */
+
+  async getSavedInterval (tab) {
+    let data = await this.getStorageTab(tab.id)
+    return await data[tab.id][GLOBAL_INTERVAL_KEY] || this._defaultInterval(tab)
+  }
+
 
   async saveInterval (tab, start, end) {
     let { id, url } = tab
     start = parseInt(start, 10)
     end = parseInt(end, 10)
 
-    if (isNaN(start) || isNaN(end))
-      throw new Error('Range values must be integers')
-
     if (!start) start = 1
     if (!end) end = 1
 
-    let data = await storage.local.get({ [INTERVAL_KEY]: {} })
+    let data = await this.getStorageTab(id)
     let interval = { id, url, start, end }
-    data[INTERVAL_KEY][tab.id] = interval
+    data[id][GLOBAL_INTERVAL_KEY] = interval
 
     try {
       await storage.local.set(data)
@@ -105,35 +126,10 @@ export class StorageApi {
     return interval
   }
 
-  async saveTabRefresh (id, type = 'before') {
-
-    if (!VALID_TYPES.includes(type)) throw new Error('Type not valid. ' + type + ' given.')
-
-    let tab = await chrome.promise.tabs.get(id)
-
-    let resultObject = await storage.local.get(REFRESH_LOGS)
-
-    let results = await resultObject[REFRESH_LOGS] || []
-
-    results.push({
-      type,
-      tab_id: tab.id,
-      url: tab.url,
-      date: new Date().toLocaleString()
-    })
-
-    return await storage.local.set({ [REFRESH_LOGS]: results })
+  _defaultInterval (tab) {
+    let id = tab.id
+    let [start, end] = [START, END]
+    return { id, start, end }
   }
 
-  clearTabStorage () {
-    return storage.local.remove(TABS_KEY)
-  }
-
-  clearLogs () {
-    return storage.local.remove(REFRESH_LOGS)
-  }
-
-  clearIntervals () {
-    return storage.local.remove(INTERVAL_KEY)
-  }
 }

@@ -12,8 +12,9 @@ let d = debug('app:constants')
 debug.log = log
 window._debug = debug
 window._clear = () => chrome.storage.local.clear()
-window._local = () => chrome.storage.local.get(null, all => console.log(all))
+window._local = () => chrome.storage.local.get(null, all => d(all))
 window._alarms = () => chrome.alarms.getAll(alarms => d(`%j`, alarms))
+window._show = () => _local() || _alarms()
 
 
 function cLog (str) {

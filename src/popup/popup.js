@@ -124,9 +124,8 @@ export class PopupTimer {
 
   async onDisableAllClick () {
     this.clearValues()
-    await this.api.disableAll()
     await this.api.removeAllAlarms()
-    await this.api.clearTabStorage()
+    await this.api.disableAll()
     return await this.showSuccessIcon()
   }
 
@@ -165,8 +164,8 @@ export class PopupTimer {
   clearValues () {
     clearTimeout(this.timeoutId)
     clearInterval(this.timeoutId)
-    this.$thisTab.text('')
-    this.$allTabs.text('')
+    // this.$thisTab.text('')
+    // this.$allTabs.text('')
     this.$refreshVal.text('')
     return this.$intervalVal.text('')
   }
