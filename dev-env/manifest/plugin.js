@@ -16,11 +16,12 @@ export default class ManifestPlugin {
       // item
       let item
       if(this.isDevelopment) {
-        item = [
-          'webpack-dev-server/client?https://localhost:3001',
-          'webpack/hot/only-dev-server',
-          script
-        ]
+        item = script
+        // item = [
+        //   'webpack-dev-server/client?https://localhost:3001',
+        //   'webpack/hot/only-dev-server',
+        //   script
+        // ]
       } else {
         item = script
       }

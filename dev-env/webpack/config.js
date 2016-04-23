@@ -50,8 +50,8 @@ function configGenerator (Manifest) {
       }
 
       if (isDevelopment) {
-        output.chunkFilename = '[name]-[chunkhash].js'
-        output.publicPath = 'https://localhost:3001/'
+        // output.chunkFilename = '[name]-[chunkhash].js'
+        // output.publicPath = 'https://localhost:3001/'
       }
 
       return output
@@ -73,12 +73,12 @@ function configGenerator (Manifest) {
 
       if (isDevelopment) {
         // Development plugins for hot reload
-        plugins = plugins.concat([
-          // NotifyPlugin,
-          new webpack.HotModuleReplacementPlugin(),
-          // Tell reloader to not reload if there is an error.
-          new webpack.NoErrorsPlugin()
-        ])
+        // plugins = plugins.concat([
+        //   // NotifyPlugin,
+        //   new webpack.HotModuleReplacementPlugin(),
+        //   // Tell reloader to not reload if there is an error.
+        //   new webpack.NoErrorsPlugin()
+        // ])
       } else {
         // Production plugins for optimizing code
         plugins = plugins.concat([

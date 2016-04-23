@@ -28,7 +28,7 @@ export default function(manifest) {
 
     manifest["content_security_policy"] = csp
 
-    log.done("Done")
+    log.done("Skip in dev")
   } else {
     log.done("Skipped in production environment")
   }

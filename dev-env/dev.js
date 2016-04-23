@@ -1,16 +1,20 @@
-import makeWebpackConfig from './webpack/config';
-import webpackDevServer from './webpack/server';
-import overrideHotUpdater from './override'
+import makeWebpackConfig from './webpack/config'
+import webpackBuild from './webpack/build'
 import Manifest from './manifest'
 import * as paths from './paths'
 
 // Override Webpack hot updater
-overrideHotUpdater()
+// overrideHotUpdater()
 
 // Create manifest
-const manifest = new Manifest({manifest: paths.manifest, build: paths.build})
+const manifest = new Manifest({ manifest: paths.manifest, build: paths.build })
 manifest.run()
 
-// Start webpack dev server
+// Build webpack
 const webpackConfig = makeWebpackConfig(manifest)
-webpackDevServer(webpackConfig)
+const building = webpackBuild(webpackConfig)
+
+building.catch((reason) => {
+  console.error(clc.red("Building failed"))
+  console.error(clc.red(reason.stack))
+})

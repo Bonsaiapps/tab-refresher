@@ -17,6 +17,7 @@ const TAB_RE = /tab-(\d+)/
 
 export class AlarmEventsPage {
 
+  ready = false
   api = new SharedApi('alarm-events-page')
   logQueue = new LogQueue()
 
@@ -27,7 +28,10 @@ export class AlarmEventsPage {
     chrome.tabs.onCreated.addListener(tab => this.onNewTab(tab))
     // On startup all tabs can get new ids
     // So we are clearing the storage to prevent confusion
-    chrome.runtime.onStartup.addListener(() => this.api.clearDataOnStartup())
+    chrome.runtime.onStartup.addListener(() => {
+      return this.api.clearDataOnStartup()
+        .then(() => this.ready = true)
+    })
   }
 
   async onTabRemoved (id) {
@@ -62,6 +66,8 @@ export class AlarmEventsPage {
   }
 
   async onNewTab (tab) {
+
+    if (!this.ready) return
 
     let { id, url } = tab
 

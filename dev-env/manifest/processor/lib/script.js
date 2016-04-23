@@ -27,15 +27,15 @@ request.send();`
 
 export default function(scriptName, buildPath) {
   if(process.env.NODE_ENV == 'development') {
-    log.pending(`Making injector '${scriptName}'`)
-
-    const injectorScript = makeInjector(scriptName);
-    const injectorFilepath = path.join(buildPath, scriptName);
-    const injectorPath = Remove.file(injectorFilepath)
-
-    fs.mkdirsSync(injectorPath)
-    fs.writeFileSync(injectorFilepath, injectorScript, {encoding: 'utf8'})
-
-    log.done()
+    // log.pending(`Making injector '${scriptName}'`)
+    //
+    // const injectorScript = makeInjector(scriptName);
+    // const injectorFilepath = path.join(buildPath, scriptName);
+    // const injectorPath = Remove.file(injectorFilepath)
+    //
+    // fs.mkdirsSync(injectorPath)
+    // fs.writeFileSync(injectorFilepath, injectorScript, {encoding: 'utf8'})
+    //
+    // log.done()
   }
 }

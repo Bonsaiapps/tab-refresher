@@ -8,10 +8,7 @@ import { REFRESH_LOGS, alarmName } from './constants'
 
 let d = debug('app:storage-api')
 
-const VALID_TYPES = ['after', 'before']
 const SETTINGS_KEY = 'settings'
-const TABS_KEY = 'tabloids'
-const INTERVAL_KEY = 'intervals'
 const GLOBAL_INTERVAL_KEY = 'interval'
 
 const START = 1
@@ -61,9 +58,18 @@ export class StorageApi {
   getStorageTabs (ids) {
     return storage.local.get(ids)
   }
-  
+
   saveStorageTabs (storageTabs) {
     return storage.local.set(storageTabs)
+  }
+
+  async removeAllStorageTabs () {
+    let data = await storage.local.get(null)
+    let { logs, settings = {} } = data
+    settings.enabled = false
+    let save = { logs, settings }
+    return storage.local.clear()
+      .then(() => storage.local.set(save))
   }
 
   /**
@@ -106,7 +112,7 @@ export class StorageApi {
 
 
   async saveInterval (tab, start, end) {
-    let { id, url } = tab
+    let { id, url, windowId } = tab
     start = parseInt(start, 10)
     end = parseInt(end, 10)
 
@@ -115,6 +121,7 @@ export class StorageApi {
 
     let data = await this.getStorageTab(id)
     let interval = { id, url, start, end }
+    data[id].windowId = windowId
     data[id][GLOBAL_INTERVAL_KEY] = interval
 
     try {

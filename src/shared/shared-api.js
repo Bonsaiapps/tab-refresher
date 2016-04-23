@@ -121,7 +121,9 @@ export class SharedApi extends StorageApi {
   }
 
   clearDataOnStartup () {
-    this.removeAllAlarms()
+    return this.removeAllStorageTabs()
+      .then(() => this.removeAllAlarms())
+      .then(() => this.enableAll(false))
   }
 
   async startSingleTab (tab, start, end) {
