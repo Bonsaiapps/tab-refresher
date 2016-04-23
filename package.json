@@ -48,7 +48,6 @@
     "file-loader": "0.8.5",
     "fs-extra": "0.28.0",
     "gulp": "github:gulpjs/gulp#4.0",
-    "gulp-babel": "^6.1.2",
     "gulp-conventional-changelog": "^1.1.0",
     "json-loader": "0.5.4",
     "lodash": "4.11.1",
