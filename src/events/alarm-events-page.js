@@ -64,9 +64,7 @@ export class AlarmEventsPage {
   }
 
   reloadTab (id) {
-    this.logQueue.addLog(id)
     return cTabs.reload(id)
-      .then(() => this.logQueue.addLog(id, 'after'))
   }
 
   async onNewTab (tab) {

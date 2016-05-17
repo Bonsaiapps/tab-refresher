@@ -3,7 +3,8 @@ import debug from 'debug'
 import countdown from 'countdown'
 import { BOLD, NORMAL } from '../shared/constants'
 import { SharedApi } from '../shared/shared-api'
-import { LogWriter } from './log-writer'
+import { SnapshotWriter } from './snapshot-writer'
+import { SNAPSHOTS_KEY } from '../shared/constants';
 
 
 /**
@@ -22,7 +23,7 @@ export class PopupTimer {
   timeoutId = null
 
   api = new SharedApi('popup')
-  logWriter = new LogWriter()
+  logWriter = new SnapshotWriter()
 
   $startRange = $('#start-range')
   $endRange = $('#end-range')
@@ -31,6 +32,7 @@ export class PopupTimer {
   $successIcon = $('.success-icon')
   $thisTab = $('#this-tab')
   $allTabs = $('#all-tabs')
+  $snapshotList = $('#snapshot-list')
 
   bindEvents () {
     chrome.runtime.onMessage.addListener(req => this[req.event](req.id))
@@ -42,6 +44,29 @@ export class PopupTimer {
     $('#view-logs').click(ev => this.onViewLogs())
     $('#clear-logs').click(ev => this.onClearLogs())
     $('#set-all-ranges').click(ev => this.onSetAllRanges())
+    $('#save-snapshot').click(ev => this.onSaveSnapshot())
+    this.$snapshotList.change(ev => this.onSnapshotChange())
+
+    this.buildSnapshotList()
+  }
+
+  async buildSnapshotList () {
+    this.$snapshotList.empty()
+    let data = await this.api.getSnapshots()
+    let snapData = data[SNAPSHOTS_KEY]
+    let dates = Object.keys(snapData)
+    d('dates', dates)
+    let html = dates.map(date => `
+      <option value="${date}">${new Date(parseInt(date, 10)).toLocaleString()}</option>
+    `)
+    html = `<option value="default" selected>Select One</option>` + html
+    this.$snapshotList.append(html)
+  }
+
+  async onSnapshotChange () {
+    let time = this.$snapshotList.val()
+    if (time == 'default') return
+    this.logWriter.writeFile(time)
   }
 
   async checkCurrentRefreshTimer () {
@@ -64,6 +89,13 @@ export class PopupTimer {
     this.parseAlarmTime(alarm)
     this.setEnabledStatus()
     return alarm
+  }
+
+  async onSaveSnapshot () {
+    let resp = await this.api.saveSnapshot()
+    this.showSuccessIcon()
+    this.buildSnapshotList()
+    return resp
   }
 
   async onSetAllRanges () {
