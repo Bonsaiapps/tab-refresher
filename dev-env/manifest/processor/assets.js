@@ -41,7 +41,7 @@ export default function (manifest, { buildPath }) {
 
   let { icons = {} } = manifest
 
-  let custom = ["popup/scripts/log-script.js"]
+  let custom = ["popup/scripts/snapshots-script.js"]
 
   // Process Icons
   if (_.size(icons))

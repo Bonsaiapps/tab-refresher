@@ -10,6 +10,7 @@ let d = debug('app:storage-api')
 
 const SETTINGS_KEY = 'settings'
 const INTERVAL_KEY = 'interval'
+const SNAPSHOTS_KEY = 'snapshots'
 
 const START = 1
 const END = 360
@@ -21,6 +22,17 @@ export class StorageApi {
   /**
    * Global Methods
    */
+
+  async saveSnap (tabs) {
+    let data = await this.getSnapshots()
+    data[SNAPSHOTS_KEY][new Date().getTime()] = tabs
+    d('data', data)
+    return storage.local.set(data)
+  }
+
+  getSnapshots () {
+    return storage.local.get({ [SNAPSHOTS_KEY]: {} })
+  }
 
   async areAllEnabled () {
     let data = await storage.local.get({ [SETTINGS_KEY]: { enabled: false } })

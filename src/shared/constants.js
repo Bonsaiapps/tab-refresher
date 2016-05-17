@@ -61,6 +61,7 @@ export const BOLD = 'font-weight: bold;'
 export const NORMAL = 'font-weight: normal;'
 export const TAB_LOGS_URL = 'https://google.com/'
 export const REFRESH_LOGS = 'logs'
+export const SNAPSHOTS_KEY = 'snapshots'
 
 export const events = {
   RELOAD_POPUP: 'reloadPopup'

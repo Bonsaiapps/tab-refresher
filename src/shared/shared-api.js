@@ -31,6 +31,16 @@ export class SharedApi extends StorageApi {
     super()
   }
 
+  async saveSnapshot () {
+    let all = await this.getAllTabs()
+    let tabs = all.map(x => {
+      let {id, url, windowId} = x
+      return {id, url, windowId}
+    })
+    d(tabs)
+    return this.saveSnap(tabs)
+  }
+
   getTab (id) {
     return cTabs.get(id)
   }
