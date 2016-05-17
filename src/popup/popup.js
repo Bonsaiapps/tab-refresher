@@ -45,9 +45,18 @@ export class PopupTimer {
     $('#clear-logs').click(ev => this.onClearLogs())
     $('#set-all-ranges').click(ev => this.onSetAllRanges())
     $('#save-snapshot').click(ev => this.onSaveSnapshot())
+    $('#reload-errors').click(ev => this.onReloadErrors())
     this.$snapshotList.change(ev => this.onSnapshotChange())
 
     this.buildSnapshotList()
+  }
+
+  async onReloadErrors () {
+    let tabs = await this.api.getAllTabs(null, {})
+    for (let tab of tabs) {
+      if (tab.status !== 'complete')
+        chrome.tabs.reload(tab.id)
+    }
   }
 
   async buildSnapshotList () {
