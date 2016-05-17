@@ -62,8 +62,8 @@ export class SharedApi extends StorageApi {
     d('')
   }
 
-  async getAllTabs (header) {
-    let tabs = await cTabs.query(ALL_TABS_QUERY)
+  async getAllTabs (header, query) {
+    let tabs = await cTabs.query(query || ALL_TABS_QUERY)
     tabs = await tabs.filter(t => !t.url.startsWith('chrome://extensions'))
 
     if (header) this.logTabs(tabs)
