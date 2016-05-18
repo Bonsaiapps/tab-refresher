@@ -1,10 +1,9 @@
 import $ from 'jquery'
 import debug from 'debug'
 import countdown from 'countdown'
-import { BOLD, NORMAL } from '../shared/constants'
+import { BOLD, NORMAL, SNAPSHOTS_KEY } from '../shared/constants'
 import { SharedApi } from '../shared/shared-api'
 import { SnapshotWriter } from './snapshot-writer'
-import { SNAPSHOTS_KEY } from '../shared/constants';
 
 
 /**
@@ -54,7 +53,8 @@ export class PopupTimer {
   async onReloadErrors () {
     let tabs = await this.api.getAllTabs(null, {})
     for (let tab of tabs) {
-      if (tab.status !== 'complete')
+      let { title } = tab
+      if (title.includes('failed') || title.includes('not available'))
         chrome.tabs.reload(tab.id)
     }
   }
