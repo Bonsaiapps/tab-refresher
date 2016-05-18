@@ -54,8 +54,11 @@ export class PopupTimer {
     let tabs = await this.api.getAllTabs(null, {})
     for (let tab of tabs) {
       let { title } = tab
-      if (title.includes('failed') || title.includes('not available'))
+      d('title', title)
+      if (title.includes('failed') || title.includes('not available')) {
+        d('reloading', tab.id)
         chrome.tabs.reload(tab.id)
+      }
     }
   }
 
