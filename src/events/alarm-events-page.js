@@ -54,6 +54,7 @@ export class AlarmEventsPage {
       return this.api.removeAllAlarms()
 
     id = parseInt(id, 10)
+    
     if (id){
       let tab = await this.reloadTab(id)
 
