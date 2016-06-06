@@ -54,13 +54,14 @@ export class AlarmEventsPage {
       return this.api.removeAllAlarms()
 
     id = parseInt(id, 10)
+    if (id){
+      let tab = await this.reloadTab(id)
 
-    let tab = await this.reloadTab(id)
+      let interval = await this.api.getSavedInterval(tab)
 
-    let interval = await this.api.getSavedInterval(tab)
-
-    await this.api.createAlarm(interval)
-    chrome.runtime.sendMessage({ event: events.RELOAD_POPUP, id: id })
+      await this.api.createAlarm(interval)
+      chrome.runtime.sendMessage({ event: events.RELOAD_POPUP, id: id })
+    }
   }
 
   reloadTab (id) {
