@@ -104,7 +104,6 @@ export class Api {
           setTimeout(() => this.reloadGroup(windowId, $current, group), RELOAD_WAIT)
       })
 
-
   }
 
   getGroup () {
