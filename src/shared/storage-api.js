@@ -19,6 +19,11 @@ let { storage } = chrome.promise
 
 export class StorageApi {
 
+
+  /**
+   * ------------ OLD SHIT -------------
+   */
+
   /**
    * Global Methods
    */
