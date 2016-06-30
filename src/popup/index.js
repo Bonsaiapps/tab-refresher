@@ -19,7 +19,7 @@ $(() => {
 
   let popup = new PopupTimer()
   popup.bindEvents()
-  popup.checkCurrentRefreshTimer()
+  popup.onOpen()
     .catch(err => {
       console.warn(err)
       popup.clearValues()

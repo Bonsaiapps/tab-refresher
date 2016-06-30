@@ -1,5 +1,5 @@
 import 'babel-polyfill'
-import { AlarmEventsPage } from './alarm-events-page'
+import { TabEventsPage } from './tab-events-page'
 
 
 /**
@@ -7,5 +7,6 @@ import { AlarmEventsPage } from './alarm-events-page'
  * @version 4/21/16 2:09 PM
  */
 
-let page = new AlarmEventsPage()
+let page = new TabEventsPage()
 page.register()
+window.bg = page

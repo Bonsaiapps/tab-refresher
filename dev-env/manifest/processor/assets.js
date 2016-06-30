@@ -41,15 +41,15 @@ export default function (manifest, { buildPath }) {
 
   let { icons = {} } = manifest
 
-  let custom = ["popup/scripts/snapshots-script.js"]
+  // let custom = ["popup/scripts/snapshots-script.js"]
 
   // Process Icons
   if (_.size(icons))
     _.forEach(icons, (iconPath, name) => processAsset(icons, name, buildPath))
 
 
-  if (custom.length)
-    custom.forEach(script => processScript(script, buildPath))
+  // if (custom.length)
+  //   custom.forEach(script => processScript(script, buildPath))
 
   return { manifest }
 }

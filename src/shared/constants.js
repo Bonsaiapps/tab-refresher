@@ -62,9 +62,11 @@ export const NORMAL = 'font-weight: normal;'
 export const TAB_LOGS_URL = 'https://google.com/'
 export const REFRESH_LOGS = 'logs'
 export const SNAPSHOTS_KEY = 'snapshots'
+export const ALARM_NAME = 'interval-alarm'
 
 export const events = {
-  RELOAD_POPUP: 'reloadPopup'
+  RELOAD_POPUP: 'reloadPopup',
+  START_PROCESS: 'startProcess'
 }
 
 
