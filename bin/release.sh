@@ -3,7 +3,7 @@ set -e
 
 merge () {
   git pull -r --tags --quiet origin master
-  git co master
+  git checkout master
   git merge develop
 }
 
