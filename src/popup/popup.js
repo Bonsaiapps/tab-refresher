@@ -34,7 +34,7 @@ export class PopupTimer {
   }
 
   async onReloadErrors () {
-    let tabs = await this.api.getAllTabs(null, {})
+    let tabs = await this.api.getAllTabs({})
     for (let tab of tabs) {
       let { title } = tab
       d('title', title)
