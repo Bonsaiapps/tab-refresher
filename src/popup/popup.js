@@ -25,7 +25,10 @@ export class PopupTimer {
 
   bindEvents () {
 
-    chrome.runtime.onMessage.addListener(req => this[req.event]())
+    chrome.runtime.onMessage.addListener(req => {
+      if (req.event == 'reloadPopup')
+        this.reloadPopup()
+    })
 
     $('#start').click(ev => this.onStartClick())
     $('#stop').click(ev => this.onStopClick())

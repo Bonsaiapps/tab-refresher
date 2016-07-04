@@ -50,6 +50,7 @@ export class Api {
     let win = await windows.getCurrent()
     this.createAlarm(win.id, interval)
 
+    chrome.runtime.sendMessage({ event: 'startProcess', id: win.id })
 
     return null
   }

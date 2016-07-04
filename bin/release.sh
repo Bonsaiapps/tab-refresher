@@ -19,7 +19,7 @@ version () {
 
 postversion () {
   git push --follow-tags
-  git co develop
+  git checkout develop
   git rebase master
   git push
 }

@@ -18,6 +18,12 @@ export class TabEventsPage {
 
   register () {
     d('*bAlarm Events Page')
+
+    chrome.runtime.onMessage.addListener(req => {
+      if (req.event == 'startProcess')
+        this.startProcess(req.id)
+    })
+
     chrome.alarms.onAlarm.addListener(alarm => this.onAlarmFired(alarm))
   }
 
