@@ -43,7 +43,8 @@ export class PopupTimer {
       d('title', title)
       if (title.includes('failed') || title.includes('not available')) {
         d('reloading', tab.id)
-        chrome.tabs.reload(tab.id)
+        if (tab.id)
+          chrome.tabs.reload(tab.id)
       }
     }
   }
