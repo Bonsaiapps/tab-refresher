@@ -20,6 +20,14 @@ let { storage, windows } = chrome.promise
 
 export class Api {
 
+  async getAllTabs (query) {
+    let tabs = await cTabs.query(query)
+    tabs = await tabs.filter(t => !t.url.startsWith('chrome://extensions'))
+
+    return tabs
+  }
+
+
   async getPopupInfo () {
 
     let data = await storage.local.get({ interval: 720 })
