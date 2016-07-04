@@ -92,8 +92,10 @@ export class Api {
           return
 
         tabGroup.map(tab => {
-          if (!tab.url.startsWith('chrome://extensions'))
-            cTabs.reload(tab.id)
+          if (!tab.url.startsWith('chrome://extensions')) {
+            if (tab.id)
+              cTabs.reload(tab.id)
+          }
         })
 
         let highestIndex = upperBound - 1
