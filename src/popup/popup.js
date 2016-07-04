@@ -29,7 +29,20 @@ export class PopupTimer {
 
     $('#start').click(ev => this.onStartClick())
     $('#stop').click(ev => this.onStopClick())
+    $('#reload-errors').click(ev => this.onReloadErrors())
 
+  }
+
+  async onReloadErrors () {
+    let tabs = await this.api.getAllTabs(null, {})
+    for (let tab of tabs) {
+      let { title } = tab
+      d('title', title)
+      if (title.includes('failed') || title.includes('not available')) {
+        d('reloading', tab.id)
+        chrome.tabs.reload(tab.id)
+      }
+    }
   }
 
   reloadPopup () {
