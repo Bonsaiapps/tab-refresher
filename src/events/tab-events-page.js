@@ -20,24 +20,22 @@ export class TabEventsPage {
     d('*bAlarm Events Page')
 
     chrome.runtime.onMessage.addListener(req => {
+      d(`Event ${req.event}`)
       if (req.event == 'startProcess')
-        this.startProcess(req.id)
+        this.startProcess()
     })
 
     chrome.alarms.onAlarm.addListener(alarm => this.onAlarmFired(alarm))
   }
 
-  async startProcess (windowId) {
+  async startProcess () {
     let gData = await this.api.getGroup()
 
-    this.api.reloadShit(windowId, gData.group)
+    this.api.reloadShit(gData.group)
   }
 
   async onAlarmFired (alarm) {
-    let { name } = alarm
-    let windowId = parseInt(name, 10)
-
-    this.startProcess(windowId)
+    this.startProcess()
     chrome.runtime.sendMessage({ event: events.RELOAD_POPUP })
   }
 

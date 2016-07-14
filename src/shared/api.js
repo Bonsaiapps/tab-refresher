@@ -1,5 +1,5 @@
+import './constants'
 import debug from 'debug'
-import { events } from './constants'
 
 /**
  * @author john
@@ -8,14 +8,14 @@ import { events } from './constants'
 
 let d = debug('app:api')
 
-const RELOAD_WAIT = 4000
+const RELOAD_WAIT = 1000
 const RETRY_ERR = 'Reloading'
 const COMPLETE_STATUS_KEY = 'complete'
 
 
 const cTabs = chrome.promise.tabs
 const cAlarms = chrome.promise.alarms
-let { storage, windows } = chrome.promise
+let { storage } = chrome.promise
 
 
 export class Api {
@@ -36,8 +36,7 @@ export class Api {
   }
 
   getAlarm () {
-    return windows.getCurrent()
-      .then(win => cAlarms.get(win.id + ''))
+    return cAlarms.get('alarm')
   }
 
   async start (interval, group) {
@@ -47,32 +46,54 @@ export class Api {
     let on = true
 
     await storage.local.set({ on, interval, group })
-    let win = await windows.getCurrent()
-    this.createAlarm(win.id, interval)
+    this.createAlarm(interval)
 
-    chrome.runtime.sendMessage({ event: 'startProcess', id: win.id })
+    chrome.runtime.sendMessage({ event: 'startProcess' })
 
     return null
   }
 
 
-  async reloadShit (windowId, group) {
-    this.reloadGroup(windowId, 0, group)
+  async reloadShit (group) {
+
+    this.reloadGroup(0, 0, group)
   }
 
-  reloadGroup (windowId, currentIndex, group) {
+  windowMap (tabs) {
+    let map = new Map()
+    for (let tab of tabs) {
+      let win = tab.windowId
+      if (map.has(win))
+        map.get(win).push(tab)
+      else
+        map.set(win, [tab])
+    }
+    return map
+  }
+
+  reloadGroup (windowIndex, currentIndex, group) {
 
     let $current = currentIndex
+    let $windowIndex = windowIndex
 
-    return cTabs.query({ windowId })
-      .then(tabs => {
+    return cTabs.query({})
+      .then(allTabs => {
 
-        d(`Tabs count`, tabs)
-        if (!tabs.length)
+        // d(`Tabs count`, allTabs)
+        if (!allTabs.length)
           return null
 
+        let map = this.windowMap(allTabs)
+        // d(map)
+
+        let windows = [...map.keys()]
+        let windowId = windows[windowIndex]
+        let tabs = map.get(windowId)
+
+        d(`Window ${windowId} Index: ${windowIndex}`)
+
         let allComplete = tabs.every(x => x.status === COMPLETE_STATUS_KEY)
-        d('All tabs are complete', allComplete)
+        // d('All tabs are complete', allComplete)
 
         if (!allComplete) {
           throw new Error(RETRY_ERR)
@@ -84,12 +105,17 @@ export class Api {
         let tabGroup = tabs.filter(({ index }) => lowerBound < index && index < upperBound)
 
         d(`currentIndex: ${currentIndex}`)
-        d(`lowerBound: ${lowerBound}`)
-        d(`upperBound: ${upperBound}`)
-        d('tabIndexes', tabGroup.map(x => x.index))
+        // d(`lowerBound: ${lowerBound}`)
+        // d(`upperBound: ${upperBound}`)
+        // d('tabIndexes', tabGroup.map(x => x.index))
 
-        if (!tabGroup.length)
-          return
+        if (!tabGroup.length) {
+          if (windowIndex == windows.length - 1) {
+            return
+          } else {
+            return this.reloadGroup(windowIndex + 1, 0, group)
+          }
+        }
 
         tabGroup.map(tab => {
           if (!tab.url.startsWith('chrome://extensions')) {
@@ -101,18 +127,20 @@ export class Api {
         let highestIndex = upperBound - 1
         let lastTab = tabGroup[tabGroup.length - 1]
 
-        d(`highestIndex: ${highestIndex}`)
-        d(`lastTabIndex: ${lastTab.index}`)
+        // d(`highestIndex: ${highestIndex}`)
+        // d(`lastTabIndex: ${lastTab.index}`)
 
         if (highestIndex === lastTab.index) {
           $current = highestIndex + 1
-          this.reloadGroup(windowId, $current, group)
+          this.reloadGroup($windowIndex, $current, group)
+        } else {
+          this.reloadGroup(windowIndex + 1, 0, group)
         }
 
       })
       .catch(err => {
         if (err.message === RETRY_ERR)
-          setTimeout(() => this.reloadGroup(windowId, $current, group), RELOAD_WAIT)
+          setTimeout(() => this.reloadGroup($windowIndex, $current, group), RELOAD_WAIT)
       })
 
   }
@@ -127,14 +155,14 @@ export class Api {
   }
 
 
-  createAlarm (windowId, interval) {
+  createAlarm (interval) {
 
     let alarmInfo = {
       periodInMinutes: interval
     }
 
-    chrome.alarms.create(windowId + '', alarmInfo)
-    return cAlarms.get(windowId + '')
+    chrome.alarms.create('alarm', alarmInfo)
+    return cAlarms.get('alarm')
   }
 
 }
