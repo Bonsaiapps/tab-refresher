@@ -12,6 +12,12 @@ import { Api } from '../shared/api'
 let d = debug('app:popup')
 const UNITS = countdown.HOURS | countdown.MINUTES | countdown.SECONDS
 
+function pad(n, width, z) {
+  z = z || '0';
+  n = n + '';
+  return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
 
 export class PopupTimer {
 
@@ -33,7 +39,19 @@ export class PopupTimer {
     $('#start').click(ev => this.onStartClick())
     $('#stop').click(ev => this.onStopClick())
     $('#reload-errors').click(ev => this.onReloadErrors())
+    this.countErrors()
+  }
 
+  async countErrors () {
+    let count = 0
+    let tabs = await this.api.getAllTabs({})
+    for (let tab of tabs) {
+      let {title} = tab
+      if (title.includes('failed') || title.includes('not available')
+        || title.includes('snap') || title.includes('502 Bad'))
+        count++
+    }
+    $('#err-count').text(count + '')
   }
 
   async onReloadErrors () {
@@ -41,12 +59,14 @@ export class PopupTimer {
     for (let tab of tabs) {
       let { title } = tab
       d('title', title)
-      if (title.includes('failed') || title.includes('not available') || title.includes('snap')) {
+      if (title.includes('failed') || title.includes('not available')
+        || title.includes('snap') || title.includes('502 Bad')) {
         d('reloading', tab.id)
         if (tab.id)
           chrome.tabs.reload(tab.id)
       }
     }
+    setTimeout(() => this.countErrors(), 2000)
   }
 
   reloadPopup () {
@@ -97,7 +117,7 @@ export class PopupTimer {
     let { scheduledTime } = alarm
 
     let date = new Date(scheduledTime)
-    let text = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+    let text = `${date.getHours()}:${pad(date.getMinutes(), 2)}:${pad(date.getSeconds(), 2)}`
     this.$refreshVal.text(text)
   }
 
