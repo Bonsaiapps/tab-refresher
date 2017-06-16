@@ -16,6 +16,7 @@ const COMPLETE_STATUS_KEY = 'complete'
 const cTabs = chrome.promise.tabs
 const cAlarms = chrome.promise.alarms
 let { storage } = chrome.promise
+const cWindows = chrome.promise.windows
 
 
 export class Api {
@@ -25,6 +26,11 @@ export class Api {
     tabs = await tabs.filter(t => !t.url.startsWith('chrome://extensions'))
 
     return tabs
+  }
+
+  async getAllWindows(){
+    let windows = await cWindows()
+    return windows
   }
 
 

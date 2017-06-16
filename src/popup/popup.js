@@ -28,6 +28,10 @@ export class PopupTimer {
   $interval = $('#interval')
   $groupCount = $('#group-count')
   $refreshVal = $('#refresh-val')
+  $winWidth = $('#win-width')
+  $winHeight = $('#win-height')
+  $winTop = $('#win-top')
+  $winLeft = $('#win-left')
 
   bindEvents () {
 
@@ -39,6 +43,7 @@ export class PopupTimer {
     $('#start').click(ev => this.onStartClick())
     $('#stop').click(ev => this.onStopClick())
     $('#reload-errors').click(ev => this.onReloadErrors())
+    $('#set-size').click(ev => this.setSize())
     this.countErrors()
   }
 
@@ -72,6 +77,14 @@ export class PopupTimer {
   reloadPopup () {
     this.clearValues()
     this.onOpen()
+  }
+
+  async setSize(){
+    let windows = await this.api.getAllWindows({})
+    for (let win of windows) {
+      chrome.windows.update(win.id, {left: this.$winLeft.val(), top: this.$winTop.val(), width: this.$winWidth.val(), height: this.$winHeight.val() })
+    }
+
   }
 
   async onStopClick () {
