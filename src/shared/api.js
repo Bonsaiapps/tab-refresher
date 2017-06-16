@@ -29,7 +29,7 @@ export class Api {
   }
 
   async getAllWindows(){
-    let windows = await cWindows()
+    let windows = await cWindows.getAll()
     return windows
   }
 

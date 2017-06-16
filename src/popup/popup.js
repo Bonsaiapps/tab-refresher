@@ -82,7 +82,7 @@ export class PopupTimer {
   async setSize(){
     let windows = await this.api.getAllWindows({})
     for (let win of windows) {
-      chrome.windows.update(win.id, {left: this.$winLeft.val(), top: this.$winTop.val(), width: this.$winWidth.val(), height: this.$winHeight.val() })
+      chrome.windows.update(win.id, {left: parseInt(this.$winLeft.val()), top: parseInt(this.$winTop.val()), width: parseInt(this.$winWidth.val()), height: parseInt(this.$winHeight.val()) })
     }
 
   }
