@@ -3,7 +3,7 @@ set -e
 
 merge () {
   git pull -r --tags --quiet origin master
-  git co master
+  git checkout master
   git merge develop
 }
 
@@ -19,7 +19,7 @@ version () {
 
 postversion () {
   git push --follow-tags
-  git co develop
+  git checkout develop
   git rebase master
   git push
 }
