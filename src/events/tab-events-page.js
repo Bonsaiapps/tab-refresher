@@ -30,7 +30,7 @@ export class TabEventsPage {
 
   async startProcess () {
     let gData = await this.api.getGroup()
-
+    chrome.runtime.sendMessage({ event: events.CURRENT_GROUP, group: gData.group })
     this.api.reloadShit(gData.group)
   }
 

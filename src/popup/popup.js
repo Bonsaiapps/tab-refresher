@@ -32,12 +32,16 @@ export class PopupTimer {
   $winHeight = $('#win-height')
   $winTop = $('#win-top')
   $winLeft = $('#win-left')
+  $totalTabs = $('#total-tabs')
+  $progress = $('#progress')
 
   bindEvents () {
 
     chrome.runtime.onMessage.addListener(req => {
       if (req.event == 'reloadPopup')
         this.reloadPopup()
+      if (req.event == 'currentGroup')
+        this.updateCounter(req.group)
     })
 
     $('#start').click(ev => this.onStartClick())
@@ -45,6 +49,13 @@ export class PopupTimer {
     $('#reload-errors').click(ev => this.onReloadErrors())
     $('#set-size').click(ev => this.setSize())
     this.countErrors()
+    this.countTabs()
+    $('#current-tab').text('0')
+  }
+
+  updateCounter(group){
+    let tab_count = group
+    $('#current-tab').text(tab_count)
   }
 
   async countErrors () {
@@ -57,6 +68,16 @@ export class PopupTimer {
         count++
     }
     $('#err-count').text(count + '')
+  }
+
+  async countTabs () {
+    let count = 0
+    let tabs = await this.api.getAllTabs({})
+    for (let tab of tabs) {
+      let {title} = tab
+        count++
+    }
+    $('#total-tabs').text(count + '')
   }
 
   async onReloadErrors () {
@@ -81,8 +102,16 @@ export class PopupTimer {
 
   async setSize(){
     let windows = await this.api.getAllWindows({})
+
+    await this.api.storeSizes(parseInt(this.$winWidth.val()), parseInt(this.$winHeight.val()), parseInt(this.$winLeft.val()), parseInt(this.$winTop.val()))
+
     for (let win of windows) {
-      chrome.windows.update(win.id, {left: parseInt(this.$winLeft.val()), top: parseInt(this.$winTop.val()), width: parseInt(this.$winWidth.val()), height: parseInt(this.$winHeight.val()) })
+      chrome.windows.update(win.id, {
+        left: parseInt(this.$winLeft.val()),
+        top: parseInt(this.$winTop.val()),
+        width: parseInt(this.$winWidth.val()),
+        height: parseInt(this.$winHeight.val())
+      })
     }
 
   }
@@ -91,6 +120,7 @@ export class PopupTimer {
     await this.api.stop()
     this.clearValues()
     this.$refreshVal.text('Stopped')
+    this.$progress.hide()
   }
 
   async onStartClick () {
@@ -106,16 +136,23 @@ export class PopupTimer {
 
   async onOpen () {
 
-    let [interval, group] = await this.api.getPopupInfo()
+    let [interval, group, winWidth, winHeight, winTop, winLeft] = await this.api.getPopupInfo()
     this.$interval.val(interval)
     this.$groupCount.val(group)
+
+    this.$winWidth.val(winWidth)
+    this.$winHeight.val(winHeight)
+    this.$winTop.val(winTop)
+    this.$winLeft.val(winLeft)
 
     let alarm = await this.api.getAlarm()
 
     if (alarm) {
       this.parseAlarmTime(alarm)
+      this.$progress.show()
     } else {
       this.$refreshVal.text('Stopped')
+      this.$progress.hide()
     }
   }
 
@@ -132,6 +169,7 @@ export class PopupTimer {
     let date = new Date(scheduledTime)
     let text = `${date.getHours()}:${pad(date.getMinutes(), 2)}:${pad(date.getSeconds(), 2)}`
     this.$refreshVal.text(text)
+    this.$progress.show()
   }
 
 }

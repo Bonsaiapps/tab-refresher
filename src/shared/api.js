@@ -38,7 +38,11 @@ export class Api {
 
     let data = await storage.local.get({ interval: 720 })
     let data2 = await storage.local.get({ group: 2 })
-    return [data.interval, data2.group]
+    let data3 = await storage.local.get({ winWidth: 1677 })
+    let data4 = await storage.local.get({ winHeight: 1055 })
+    let data5 = await storage.local.get({ winTop: 0 })
+    let data6 = await storage.local.get({ winLeft: 0 })
+    return [data.interval, data2.group, data3.winWidth, data4.winHeight, data5.winTop, data6.winLeft]
   }
 
   getAlarm () {
@@ -59,6 +63,9 @@ export class Api {
     return null
   }
 
+  async storeSizes(winWidth, winHeight, winTop, winLeft){
+    await storage.local.set({ winWidth, winHeight, winTop, winLeft })
+  }
 
   async reloadShit (group) {
 
@@ -82,9 +89,9 @@ export class Api {
     let $current = currentIndex
     let $windowIndex = windowIndex
 
+
     return cTabs.query({})
       .then(allTabs => {
-
         // d(`Tabs count`, allTabs)
         if (!allTabs.length)
           return null
@@ -132,7 +139,7 @@ export class Api {
 
         let highestIndex = upperBound - 1
         let lastTab = tabGroup[tabGroup.length - 1]
-
+        chrome.runtime.sendMessage({ event: events.CURRENT_GROUP, group: currentIndex })
         // d(`highestIndex: ${highestIndex}`)
         // d(`lastTabIndex: ${lastTab.index}`)
 

@@ -66,7 +66,8 @@ export const ALARM_NAME = 'interval-alarm'
 
 export const events = {
   RELOAD_POPUP: 'reloadPopup',
-  START_PROCESS: 'startProcess'
+  START_PROCESS: 'startProcess',
+  CURRENT_GROUP: 'currentGroup'
 }
 
 
